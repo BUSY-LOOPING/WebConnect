@@ -1,0 +1,13 @@
+# Netscape HTTP Cookie File
+# https://curl.haxx.se/rfc/cookie_spec.html
+# This is a generated file! Do not edit.
+
+.netflix.com	TRUE	/	FALSE	1770251243	netflix-sans-normal-3-loaded	true
+.netflix.com	TRUE	/	FALSE	1770251243	netflix-sans-bold-3-loaded	true
+.netflix.com	TRUE	/	FALSE	1791312834	OptanonAlertBoxClosed	2025-10-06T18:53:54.023Z
+.netflix.com	TRUE	/	FALSE	1791312836	nfvdid	BQFmAAEBEBLc8z5GYulm6Rx0ZIXmiklgdeTDzh7g369p-8Xs3zW3mMjjM4ib9AlKNIrIyI4-7pBxkHWPs4TtzjSGpHSOpxZSsJ4kMa0M9dPwp0zmdmgpoFqfDOvWncfK0qrK4u1u2wbepV5-8jDu3mD5YCjudz9M
+.netflix.com	TRUE	/	TRUE	1793988257	SecureNetflixId	v%3D3%26mac%3DAQEAEQABABSuUPsMf9xUCnRV0_ktjPJE96lk_qbNyrA.%26dt%3D1762452257976
+.netflix.com	TRUE	/	TRUE	1793988257	NetflixId	ct%3DBgjHlOvcAxLmA-j1oGqL1j0lsHGytJIgqcs7ONtaANEiKRyJLzRFbUeGaORaLy9JsW0_ELZqJyGblkqMrFdUy3BrIL3egIDwbsMGkueQm34bCEZTOoTDGSFR08ZADZImPpCd8lNdzdJuypW-ssRCY92KEstxAhwO8g44jmH7u4d9FYX-0exgZVLjU5vUtFkgx-lKbLEBuP4x_M5ytdbW9s3gybr-5X0osmwImdQtkRx_g75CAIXi0HYKD6q6Rx5pnwqYy_QmKO8863VIHXTrL3HogbyngoHzbcvPQJ0z-vPDjyE2CXNnt1QR4t-GmgWt6oP5c9kXotZYkJUI7cKcDFbJQzSsSupmSmuyEJ1umRYaBS9ovDszPYkgagvFh2-B0OLiSzSZg0UNHBZ5A6w1_qyvl0x0xHpqucJ4quk0Z5peqAySzGeRkaNXTp6T6AxfBWUnFRUV2kS6Fumh_pl9ynVPJ16X5iklEJdrxGjFZH0Mm3a3BBIFdgHrBeMaYIey6Fr5fHk5sbJldmEbXXOPZhd4Dqv_22Q5Tstw5LgUIz5ViySOxSqbq4KT4jL4KqBtfSZHv8cV31-X3SJLIXTzsrqbUp9S3uVAsHZczYtDyAfg6zVqJYvEol8T3GyPyN6EzzHe7BYyLeyXbLxgNomlNRgGIg4KDF396fayHUj7xfsxrw..%26ch%3DAQEAEAABABSF160vMMTbsksRkYTm_f2vpi1M78HE7RQ.%26v%3D3%26pg%3DSNUXMW6LIFEKFHBJPQCLAIZLLQ
+.netflix.com	TRUE	/	TRUE	1762561528	gsid	3b7351dd-61bf-4bb4-b51d-8858257c9c1e
+.netflix.com	TRUE	/	FALSE	1762477626	profilesNewSession	0
+.netflix.com	TRUE	/	FALSE	1794011165	OptanonConsent	isGpcEnabled=0&datestamp=Thu+Nov+06+2025+19%3A26%3A05+GMT-0500+(Eastern+Standard+Time)&version=202508.1.0&browserGpcFlag=0&isIABGlobal=false&hosts=&consentId=fcdd8d74-0af1-4459-b1cf-cb0f99608d70&interactionCount=2&isAnonUser=1&landingPath=NotLandingPage&groups=C0001%3A1%2CC0002%3A1%2CC0003%3A1%2CC0004%3A1&AwaitingReconsent=false&intType=3&geolocation=CA%3BON
