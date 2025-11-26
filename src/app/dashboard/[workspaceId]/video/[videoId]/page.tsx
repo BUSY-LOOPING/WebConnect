@@ -1,5 +1,4 @@
-"use client";
-
+import { getUserProfile, getVideoComments } from "@/actions/user";
 import { getPreviewVideo } from "@/actions/workspace";
 import VideoPreview from "@/components/globals/videos/preview";
 import {
@@ -7,25 +6,32 @@ import {
   HydrationBoundary,
   QueryClient,
 } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
-import React, { useEffect } from "react";
 
-type Props = {};
+type Props = {
+  params: Promise<{
+    videoId: string;
+  }>;
+};
 
-const VideoPage = async (props: Props) => {
-  const params = useParams<{ videoId: string }>();
-  const videoId = params.videoId;
-
-  console.log("video Id", videoId);
+const VideoPage = async ({ params }: Props) => {
+  const { videoId } = await params;
 
   const query = new QueryClient();
 
-  useEffect(() => {
-    query.prefetchQuery({
-      queryKey: ["preview-video"],
-      queryFn: () => getPreviewVideo(videoId),
-    });
-  }, [videoId]);
+  await query.prefetchQuery({
+    queryKey: ["preview-video"],
+    queryFn: () => getPreviewVideo(videoId),
+  });
+
+  await query.prefetchQuery({
+    queryKey: ["user-profile"],
+    queryFn: getUserProfile,
+  });
+
+  await query.prefetchQuery({
+    queryKey: ["video-comments"],
+    queryFn: () => getVideoComments(videoId),
+  });
 
   return (
     <HydrationBoundary state={dehydrate(query)}>
