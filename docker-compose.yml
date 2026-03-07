@@ -1,0 +1,109 @@
+networks:
+  webconnect-net:
+    driver: bridge
+
+volumes:
+  minio-data:
+
+services:
+  web:
+    build: ./web
+    container_name: webconnect-web
+    ports:
+      - "${NEXTJS_PORT:-3000}:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:${EXPRESS_PORT:-3001}
+      - MINIO_ENDPOINT=minio:9000
+    networks:
+      - webconnect-net
+    depends_on:
+      - express
+      - minio
+    restart: unless-stopped
+
+  express:
+    build: ./express
+    container_name: webconnect-express
+    ports:
+      - "${EXPRESS_PORT:-3001}:3001"
+    env_file:
+    - .env
+    environment:
+    - NODE_ENV=production
+    networks:
+      - webconnect-net
+    depends_on:
+      - minio
+      - whisper
+      # - ffmpeg
+    restart: unless-stopped
+
+  whisper:
+    image: onerahmet/openai-whisper-asr-webservice:latest
+    container_name: webconnect-whisper
+    ports:
+      - "${WHISPER_PORT:-9005}:9000"
+    environment:
+      - WHISPER_ASR_WEBSERVICE_MODEL=${WHISPER_MODEL}
+    networks:
+      - webconnect-net
+    # GPU config (Linux server only)
+    # runtime: nvidia
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    mem_limit: 8g
+    restart: unless-stopped
+
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: webconnect-minio
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    networks:
+      - webconnect-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    restart: unless-stopped
+
+  minio-setup:
+    image: minio/mc:latest
+    container_name: webconnect-minio-setup
+    depends_on:
+      minio:
+        condition: service_healthy
+    networks:
+      - webconnect-net
+    entrypoint: >
+      /bin/sh -c "
+      sleep 10 &&
+      /usr/bin/mc alias set myminio http://minio:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD} &&
+      /usr/bin/mc mb -p myminio/${MINIO_BUCKET_NAME} &&
+      /usr/bin/mc anonymous set public myminio/${MINIO_BUCKET_NAME} &&
+      echo '✅ Public bucket ${MINIO_BUCKET_NAME} created!' &&
+      sleep infinity
+      "
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME}
+  # ffmpeg:
+  #   build: ./ffmpeg
+  #   container_name: webconnect-ffmpeg
+  #   networks:
+  #     - webconnect-net
+  #   restart: unless-stopped

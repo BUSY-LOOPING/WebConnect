@@ -1,0 +1,8 @@
+services:
+  whisper:
+    image: onerahmet/openai-whisper-asr-webservice:latest
+    ports:
+      - "9005:9000"
+    environment:
+      WHISPER_ASR_WEBSERVICE_MODEL: medium
+    mem_limit: 8g
