@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent { docker { image 'docker:24-dind' } }
 
     stages {
         stage('Checkout') {
