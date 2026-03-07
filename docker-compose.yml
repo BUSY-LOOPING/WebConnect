@@ -13,7 +13,8 @@ services:
       - "${NEXTJS_PORT:-3000}:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:${EXPRESS_PORT:-3001}
-      - MINIO_ENDPOINT=minio:9000
+    env_file:
+      - .env  
     networks:
       - webconnect-net
     depends_on:
