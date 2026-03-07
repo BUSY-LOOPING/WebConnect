@@ -7,7 +7,10 @@ volumes:
 
 services:
   web:
-    build: ./web
+    build:
+      context: ./web
+      args:
+        DATABASE_URL: ${DATABASE_URL} 
     container_name: webconnect-web
     ports:
       - "${NEXTJS_PORT:-3000}:3000"
