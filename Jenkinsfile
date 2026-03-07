@@ -15,6 +15,8 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'webconnect-env', variable: 'SECURE_ENV')]) {
                     script {
+                        sh 'sudo chown -R jenkins:jenkins .'
+                        
                         sh "cp \$SECURE_ENV .env"
                         sh 'docker compose up --build -d'
                         
