@@ -14,10 +14,10 @@ pipeline {
         stage('Build & Start Docker Compose') {
             steps {
                 script {
-                    sh 'docker --version'
-                    sh 'docker-compose --version'
-
-                    sh 'docker-compose up --build -d'
+                    sh 'docker version'
+                    
+                    sh 'docker compose version'
+                    sh 'docker compose up --build -d'
 
                     echo 'Waiting for 5 seconds for containers to settle...'
                     sleep 5
