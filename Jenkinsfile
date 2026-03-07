@@ -13,14 +13,14 @@ pipeline {
 
         stage('Build & Start Docker Compose') {
             steps {
-                script {
-                    sh 'docker version'
-                    
-                    sh 'docker compose version'
-                    sh 'docker compose up --build -d'
-
-                    echo 'Waiting for 5 seconds for containers to settle...'
-                    sleep 5
+                withCredentials([file(credentialsId: 'webconnect-env', variable: 'SECURE_ENV')]) {
+                    script {
+                        sh "cp \$SECURE_ENV .env"
+                        sh 'docker compose up --build -d'
+                        
+                        echo 'Waiting for 5 seconds...'
+                        sleep 5
+                    }
                 }
             }
         }
