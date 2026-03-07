@@ -11,6 +11,9 @@ services:
       context: ./web
       args:
         DATABASE_URL: ${DATABASE_URL} 
+        STRIPE_SUBSCRIPTION_PRICE_ID: ${STRIPE_SUBSCRIPTION_PRICE_ID}
+        NEXT_PUBLIC_STRIPE_PUBLISH_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISH_KEY}
+        STRIPE_CLIENT_SECRET: ${STRIPE_CLIENT_SECRET}
     container_name: webconnect-web
     ports:
       - "${NEXTJS_PORT:-3000}:3000"
