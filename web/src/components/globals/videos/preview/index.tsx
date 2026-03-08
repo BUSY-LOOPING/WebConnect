@@ -74,7 +74,7 @@ const VideoPreview = ({ videoId }: Props) => {
         </div>
 
         <video
-          poster={`${process.env.NEXT_PUBLIC_CLOUD_FRONT_STREAM_URL}/${video.source}#t=0.1`}
+        //   poster={`${process.env.NEXT_PUBLIC_CLOUD_FRONT_STREAM_URL}/${video.source}#t=0.1`}
           preload="metadata"
           className={`w-full aspect-video rounded-xl transition-opacity duration-500 ${
             isPlaying ? "opacity-100" : "opacity-50"
@@ -87,7 +87,7 @@ const VideoPreview = ({ videoId }: Props) => {
           onPause={() => setIsPlaying(false)}
         >
           <source
-            src={`${process.env.NEXT_PUBLIC_CLOUD_FRONT_STREAM_URL}/${video.source}#1`}
+            src={`${process.env.NEXT_PUBLIC_CLOUD_FRONT_STREAM_URL}/${video.source}#t=0.1`}
           />
         </video>
 

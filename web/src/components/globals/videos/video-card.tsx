@@ -54,7 +54,7 @@ const VideoCard = (props: Props) => {
         >
           {" "}
           <video
-            poster={`${process.env.NEXT_PUBLIC_CLOUD_FRONT_STREAM_URL}/${props.source}#t=0.1`}
+            // poster={`${process.env.NEXT_PUBLIC_CLOUD_FRONT_STREAM_URL}/${props.source}#t=0.1`}
             controls={false}
             preload="metadata"
             className="w-full aspect-video opacity-50 z-20"

@@ -69,7 +69,7 @@ const Sidebar = ({ activeWorkspaceId }: Props) => {
 
   const SidebarSection = (
     <div className="bg-[#111111] flex-none relative p-4 h-screen w-[250px] flex flex-col gap-4 items-center overflow-y-auto">
-      <div className="bg-[#111111] gap-2 py-4 justify-center flex items-center mb-4">
+      <div className="bg-[#111111] gap-2 py-4 justify-center flex items-center mb-4 w-full z-20 sticky top-0">
         <Image src="/main-logo.svg" height={40} width={40} alt="logo" />
         <p className="text-2xl">WebConnect</p>
       </div>
@@ -207,7 +207,7 @@ const Sidebar = ({ activeWorkspaceId }: Props) => {
     <div className="full">
       <InfoBar />
 
-      <div className="md:hidden fixed my-4">
+      <div className="md:hidden fixed my-4 z-11">
         <Sheet>
           <SheetTrigger asChild className="ml-2">
             <Button variant={"ghost"} className="mt-[2px]">
