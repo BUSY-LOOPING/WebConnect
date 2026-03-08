@@ -10,7 +10,7 @@ export const sendEmail = async (
   to: string,
   subject: string,
   text: string,
-  html?: string
+  html?: string,
 ) => {
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
@@ -84,6 +84,7 @@ export const onAuthenticateUser = async () => {
     }
     return { status: 400 };
   } catch (error) {
+    console.error("Full error:", error); // ← change this line
     return { status: 500 };
   }
 };
@@ -230,7 +231,7 @@ export const createCommentAndReply = async (
   userId: string,
   comment: string,
   videoId: string,
-  commentId?: string | undefined
+  commentId?: string | undefined,
 ) => {
   try {
     if (commentId) {
@@ -306,7 +307,7 @@ export const getUser = async () => {
       lastname: true,
       email: true,
       image: true,
-      trial:true,
+      trial: true,
       subscription: {
         select: { plan: true },
       },
@@ -342,7 +343,7 @@ export const getVideoComments = async (id: string) => {
 export const inviteMembers = async (
   workspaceId: string,
   receiverId: string,
-  email: string
+  email: string,
 ) => {
   try {
     const user = await currentUser();
@@ -394,7 +395,7 @@ export const inviteMembers = async (
             email,
             "You got an invitation",
             `You are invited to join ${workspace.name} Workspace, click accept to confirm`,
-            `<a href="${process.env.NEXT_PUBLIC_HOST_URL}/invite/${invitation.id}" style="background-color: #000; padding: 5px 10px: border-radius: 10px;">Accept Invite</a>`
+            `<a href="${process.env.NEXT_PUBLIC_HOST_URL}/invite/${invitation.id}" style="background-color: #000; padding: 5px 10px: border-radius: 10px;">Accept Invite</a>`,
           );
           transporter.sendMail(mailOptions, async (error, info) => {
             if (error) {
@@ -498,8 +499,8 @@ export const completeSubscription = async (sesssion_id: string) => {
         return { status: 200 };
       }
     }
-    return {status: 404}
+    return { status: 404 };
   } catch (error) {
-    return {status: 400}
+    return { status: 400 };
   }
 };

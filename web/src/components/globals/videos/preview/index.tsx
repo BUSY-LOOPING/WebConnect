@@ -41,22 +41,16 @@ const VideoPreview = ({ videoId }: Props) => {
   const { data: video, status, author } = data as VideoProps;
   if (status !== 200) router.push("/");
 
-//   useEffect(() => {
-//     if (video?.views === 0) {
-//       notifyFirstView();
-//     }
-//   }, [video]);
-
   const daysAgo = Math.floor(
     (new Date().getTime() - video.createdAt.getTime()) / (24 * 60 * 60 * 1000),
   );
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-3 lg:py-10 overflow-y-auto gap-5">
-      <div className="flex flex-col lg:col-span-2 gap-y-10">
+    <div className="grid grid-cols-1 xl:grid-cols-3 py-6 lg:py-10 overflow-y-auto gap-6 px-4 lg:px-0">
+      <div className="flex flex-col lg:col-span-2 gap-y-6 lg:gap-y-10">
         <div>
-          <div className="flex gap-x-5 items-start justify-between">
-            <h2 className="text-white text-4xl font-bold">{video.title}</h2>
+          <div className="flex gap-x-3 items-start justify-between">
+            <h2 className="text-white text-2xl md:text-4xl font-bold leading-tight">{video.title}</h2>
             {author ? (
               <EditVideo
                 videoId={videoId}
@@ -68,14 +62,15 @@ const VideoPreview = ({ videoId }: Props) => {
             )}
           </div>
           <span className="flex gap-x-3 mt-2">
-            <p className="text-[#9d9d9d] capitalize">
+            <p className="text-[#9d9d9d] capitalize text-sm md:text-base">
               {video.User?.firstname} {video.User?.lastname}
             </p>
-            <p className="text-[#707070]">
+            <p className="text-[#707070] text-sm md:text-base">
               {daysAgo === 0 ? "Today" : `${daysAgo}d ago`}
             </p>
           </span>
         </div>
+
         <video
           preload="metadata"
           className={`w-full aspect-video rounded-xl transition-opacity duration-500 ${
@@ -84,17 +79,18 @@ const VideoPreview = ({ videoId }: Props) => {
           controls
           onPlay={() => {
             setIsPlaying(true);
-            sendEmailForFirstView(videoId)
+            sendEmailForFirstView(videoId);
           }}
           onPause={() => setIsPlaying(false)}
         >
           <source
             src={`${process.env.NEXT_PUBLIC_CLOUD_FRONT_STREAM_URL}/${video.source}#1`}
-          ></source>
+          />
         </video>
-        <div className="flex flex-col text-2xl gap-y-4">
-          <div className="flex gap-x-5 items-center justify-between">
-            <p className="text-[#bdbdbd] text-semibold">Description</p>
+
+        <div className="flex flex-col gap-y-3">
+          <div className="flex gap-x-3 items-center justify-between">
+            <p className="text-[#bdbdbd] font-semibold text-lg md:text-2xl">Description</p>
             {author ? (
               <EditVideo
                 videoId={videoId}
@@ -105,14 +101,15 @@ const VideoPreview = ({ videoId }: Props) => {
               <></>
             )}
           </div>
-          <p className="text-[#9d9d9d] text-lg text-md">{video.description}</p>
+          <p className="text-[#9d9d9d] text-base md:text-lg">{video.description}</p>
         </div>
       </div>
-      <div className="lg:col-span-1 flex flex-col gap-y-16">
-        <div className="flex justify-end gap-x-3">
+
+      <div className="lg:col-span-1 flex flex-col gap-y-8 lg:gap-y-16">
+        <div className="flex justify-start lg:justify-end items-center gap-x-3 flex-wrap gap-y-2">
           <CopyLink
             variant={"outline"}
-            className="rounded-full bg-transparent! px-10!"
+            className="rounded-full bg-transparent! px-6! md:px-10!"
             videoId={videoId}
           />
           <RichLink
@@ -121,7 +118,7 @@ const VideoPreview = ({ videoId }: Props) => {
             source={video.source}
             title={video.title as string}
           />
-          <DownloadIcon className="text-[#4d4c4c]" />
+          <DownloadIcon className="text-[#4d4c4c] cursor-pointer hover:text-[#9d9d9d] transition-colors" />
         </div>
         <div>
           <TabMenu
@@ -133,9 +130,7 @@ const VideoPreview = ({ videoId }: Props) => {
               trial={video.User?.trial!}
               plan={video.User?.subscription?.plan!}
             />
-
             <VideoTranscript description={video.summary!} />
-
             <Activities
               author={video.User?.firstname as string}
               videoId={videoId}

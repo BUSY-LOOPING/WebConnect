@@ -11,23 +11,26 @@ const s3 = new S3Client({
   forcePathStyle: true,
 });
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ filename: string }> },
-) {
-  const { filename } = await params;
-  const command = new GetObjectCommand({
-    Bucket: process.env.BUCKET_NAME!,
-    Key: filename,
-  });
+export async function GET(req: NextRequest, { params }: { params: Promise<{ filename: string }> }) {
+    try {
+        const { filename } = await params
 
-  const s3Response = await s3.send(command);
-  const stream = s3Response.Body as ReadableStream;
+        const command = new GetObjectCommand({
+            Bucket: process.env.MINIO_BUCKET_NAME,
+            Key: filename,
+        })
 
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "video/webm",
-      "Cache-Control": "public, max-age=86400",
-    },
-  });
+        const s3Response = await s3.send(command)
+        const stream = s3Response.Body as ReadableStream
+
+        return new Response(stream, {
+            headers: {
+                'Content-Type': 'video/webm',
+                'Cache-Control': 'public, max-age=86400',
+            }
+        })
+    } catch (err) {
+        console.error('Video proxy error:', err)
+        return new Response('Failed to load video', { status: 500 })
+    }
 }

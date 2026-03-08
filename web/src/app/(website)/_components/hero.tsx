@@ -10,9 +10,9 @@ const Hero = () => {
         AI-Powered Screen Recorder
       </div>
 
-      <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.05] max-w-4xl text-white">
+      <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.05] max-w-4xl text-white/70">
         Record any screen.{" "}
-        <span className="text-[#7320DD]">Understand everything.</span>
+        <span className="text-[#ffffff]">Understand everything.</span>
       </h1>
 
       <p className="text-white/50 text-lg md:text-xl max-w-2xl leading-relaxed">

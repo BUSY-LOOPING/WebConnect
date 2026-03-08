@@ -48,7 +48,7 @@ const Sidebar = ({ activeWorkspaceId }: Props) => {
 
   const { data: notifications } = useQueryData(
     ["user-notifications"],
-    getNotifications
+    getNotifications,
   );
   const { data: workspace } = data as WorkspaceProps;
   const { data: count } = notifications as NotificationProps;
@@ -58,14 +58,14 @@ const Sidebar = ({ activeWorkspaceId }: Props) => {
   };
 
   const currentWorkspace = workspace.workspace.find(
-    (s) => s.id == activeWorkspaceId
+    (s) => s.id == activeWorkspaceId,
   );
 
   useEffect(() => {
-  if (isFetched && workspace) {
-    dispatch(WORKSPACES({ workspaces: workspace.workspace }));
-  }
-}, [isFetched, workspace, dispatch]);
+    if (isFetched && workspace) {
+      dispatch(WORKSPACES({ workspaces: workspace.workspace }));
+    }
+  }, [isFetched, workspace, dispatch]);
 
   const SidebarSection = (
     <div className="bg-[#111111] flex-none relative p-4 h-screen w-[250px] flex flex-col gap-4 items-center overflow-y-auto">
@@ -77,7 +77,7 @@ const Sidebar = ({ activeWorkspaceId }: Props) => {
         defaultValue={activeWorkspaceId}
         onValueChange={onChangeActiveWorkspace}
       >
-        <SelectTrigger className="w-full mt-16 text-neutral-400 bg-transparent">
+        <SelectTrigger className="w-full text-neutral-400 bg-transparent">
           <SelectValue placeholder="Select a workspace"></SelectValue>
         </SelectTrigger>
         <SelectContent className="bg-[#111111] backdrop-blur-xl">
@@ -99,7 +99,7 @@ const Sidebar = ({ activeWorkspaceId }: Props) => {
                     >
                       {workspace.WorkSpace.name}
                     </SelectItem>
-                  )
+                  ),
               )}
           </SelectGroup>
         </SelectContent>
@@ -173,7 +173,7 @@ const Sidebar = ({ activeWorkspaceId }: Props) => {
                       </WorkspacePlaceholder>
                     }
                   />
-                )
+                ),
             )}
           {workspace.members.length > 0 &&
             workspace.members.map((item) => (
@@ -198,10 +198,7 @@ const Sidebar = ({ activeWorkspaceId }: Props) => {
         <GlobalCard
           title="Upgrade to Pro"
           description="Unlock AI features like transcription, AI summary, and more"
-          footer={
-            
-            <PaymentButton/>
-          }
+          footer={<PaymentButton />}
         />
       )}
     </div>
@@ -217,10 +214,7 @@ const Sidebar = ({ activeWorkspaceId }: Props) => {
               <Menu />
             </Button>
           </SheetTrigger>
-          <SheetContent
-            side={"left"}
-            className="p-0 w-fit h-full"
-          >
+          <SheetContent side={"left"} className="p-0 w-fit h-full">
             {SidebarSection}
           </SheetContent>
         </Sheet>

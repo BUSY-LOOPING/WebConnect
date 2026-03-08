@@ -42,8 +42,8 @@ const LandingPageNavBar = (props: Props) => {
         </button>
 
         <div className="text-3xl font-semibold flex items-center gap-x-3">
-          <Image alt="logo" src="/main-logo.svg" width={40} height={40} />
-          <span className="text-white/90 font-semibold">WebConnect</span>
+          <Image alt="logo" src="/main-logo.svg" width={32} height={32} className="w-8 h-8 md:w-10 md:h-10" />
+          <span className="text-white/90 font-semibold text-xl md:text-3xl">WebConnect</span>
         </div>
 
         <div className="hidden gap-x-2 items-center lg:flex">
@@ -51,7 +51,7 @@ const LandingPageNavBar = (props: Props) => {
             onClick={() => handleTab("home")}
             className={`py-2 px-5 font-semibold text-lg rounded-full transition-colors ${
               tab === "home"
-                ? "bg-[#7320DD] hover:bg-[#7320DD]/80"
+                ? "bg-white text-black"
                 : "text-white/50 hover:text-white hover:bg-white/5"
             }`}
           >
@@ -61,7 +61,7 @@ const LandingPageNavBar = (props: Props) => {
             onClick={() => handleTab("pricing")}
             className={`py-2 px-5 font-semibold text-lg rounded-full transition-colors ${
               tab === "pricing"
-                ? "bg-[#7320DD] hover:bg-[#7320DD]/80"
+                ? "bg-white text-black"
                 : "text-white/50 hover:text-white hover:bg-white/5"
             }`}
           >
@@ -69,7 +69,7 @@ const LandingPageNavBar = (props: Props) => {
           </button>
         </div>
 
-        <div className="flex items-center gap-x-3">
+        <div className="hidden lg:flex items-center gap-x-3">
           <Link href="/auth/sign-in">
             <Button className="text-base flex gap-x-2">
               <User />
@@ -93,7 +93,7 @@ const LandingPageNavBar = (props: Props) => {
       >
         <div className="flex items-center justify-between px-5 py-5 border-b border-white/10">
           <div className="flex items-center gap-x-2.5">
-            <Image alt="logo" src="/main-logo.svg" width={32} height={32} />
+            <Image alt="logo" src="/main-logo.svg" width={28} height={28} className="w-7 h-7" />
             <span className="font-semibold text-lg">WebConnect</span>
           </div>
           <button
@@ -112,13 +112,13 @@ const LandingPageNavBar = (props: Props) => {
             onClick={() => handleTab("home")}
             className={`flex items-center gap-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-left ${
               tab === "home"
-                ? "bg-[#7320DD]/15 text-[#7320DD]"
+                ? "bg-white text-black"
                 : "text-white/50 hover:text-white hover:bg-white/5"
             }`}
           >
             <span
               className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                tab === "home" ? "bg-[#7320DD]" : "bg-white/20"
+                tab === "home" ? "bg-black" : "bg-white/20"
               }`}
             />
             Home
@@ -127,20 +127,20 @@ const LandingPageNavBar = (props: Props) => {
             onClick={() => handleTab("pricing")}
             className={`flex items-center gap-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-left ${
               tab === "pricing"
-                ? "bg-[#7320DD]/15 text-[#7320DD]"
+                ? "bg-white text-black"
                 : "text-white/50 hover:text-white hover:bg-white/5"
             }`}
           >
             <span
               className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                tab === "pricing" ? "bg-[#7320DD]" : "bg-white/20"
+                tab === "pricing" ? "bg-black" : "bg-white/20"
               }`}
             />
             Pricing
           </button>
         </div>
 
-        <div className="mt-auto p-4 border-t border-white/10">
+         <div className="mt-auto p-4 border-t border-white/10">
           <Link href="/auth/sign-in" onClick={() => setSidebarOpen(false)}>
             <Button className="w-full text-sm flex gap-x-2">
               <User className="w-4 h-4" />

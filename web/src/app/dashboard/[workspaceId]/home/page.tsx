@@ -3,11 +3,7 @@
 import { useParams } from "next/navigation";
 import HomeGreeting from "@/components/globals/home-greeting";
 import HomeStats from "@/components/globals/home-stats";
-import QuickActions from "@/components/globals/quick-actions";
-import RecentVideos from "@/components/globals/recent-videos";
 import UpgradeBanner from "@/components/globals/upgrade-banner";
-import Folders from "@/components/globals/folders";
-import { useCurrentUser } from "@/hooks/use-current-user";
 import { useQueryData } from "@/hooks/useQueryData";
 import { getWorkSpaces } from "@/actions/workspace";
 

@@ -13,40 +13,30 @@ type Props = {
 
 const Activities = ({ author, videoId }: Props) => {
   const { data } = useQueryData(["video-comments", videoId], () =>
-    getVideoComments(videoId)
+    getVideoComments(videoId),
   );
 
   const comments = (data as VideoCommentProps)?.data ?? [];
   return (
     <TabsContent
       value="Activity"
-      className="p-5 bg-[#1d1d1d] rounded-xl flex flex-col gap-y-5"
+      className="p-3 md:p-5 bg-[#1d1d1d] rounded-xl flex flex-col gap-y-4 md:gap-y-5"
     >
       <CommentForm author={author} videoId={videoId} />
-      {/* <CommentCard
-        comment={comment.comment}
-        key={comment.id}
-        author={{
-          image: comment.User?.image,
-          firstname: comment.User?.firstname!,
-          lastname: comment.User?.lastname!,
-        }}
-        videoId={videoId}
-        reply={comment.reply}
-        commentId={comment.id}
-      /> */}
-      {comments.map((comment) => (<CommentCard
-        comment={comment.comment}
-        key={comment.id}
-        author={{
-          image: comment.User?.image,
-          firstname: comment.User?.firstname!,
-          lastname: comment.User?.lastname!,
-        }}
-        videoId={videoId}
-        reply={comment.reply}
-        commentId={comment.id}
-      />))}
+      {comments.map((comment) => (
+        <CommentCard
+          comment={comment.comment}
+          key={comment.id}
+          author={{
+            image: comment.User?.image,
+            firstname: comment.User?.firstname!,
+            lastname: comment.User?.lastname!,
+          }}
+          videoId={videoId}
+          reply={comment.reply}
+          commentId={comment.id}
+        />
+      ))}
     </TabsContent>
   );
 };

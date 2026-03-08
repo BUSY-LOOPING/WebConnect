@@ -5,8 +5,8 @@ import React from 'react'
 type Props = {}
 
 const AuthCallbackPage = async (props: Props) => {
-  const auth = await onAuthenticateUser()
-  console.log(auth)
+  const auth = await onAuthenticateUser()   
+  console.log('Auth result:', JSON.stringify(auth))
   if (auth.status === 200 || auth.status  === 201) {
       return redirect(`/dashboard/${auth.user?.workspace[0].id}`)
     }
