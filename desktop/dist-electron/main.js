@@ -62,6 +62,9 @@ function createWindow() {
       (/* @__PURE__ */ new Date()).toLocaleString()
     );
   });
+  win.webContents.on("did-finish-load", () => {
+    win == null ? void 0 : win.webContents.openDevTools({ mode: "detach" });
+  });
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
     studio.loadURL(`${"http://localhost:5173"}/studio.html`);

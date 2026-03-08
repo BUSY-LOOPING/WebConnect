@@ -112,9 +112,9 @@ function createWindow() {
     );
   });
 
-    // win.webContents.on("did-finish-load", () => {
-    //   win?.webContents.openDevTools({ mode: "detach" }); // opens as separate window
-    // });
+    win.webContents.on("did-finish-load", () => {
+      win?.webContents.openDevTools({ mode: "detach" }); // opens as separate window
+    });
 
   //   studio.webContents.on("did-finish-load", () => {
   //     studio?.webContents.openDevTools({ mode: "detach" });
