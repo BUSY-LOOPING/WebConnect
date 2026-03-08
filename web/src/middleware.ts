@@ -5,6 +5,9 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
   process.env.NEXT_API_HOST,
+  process.env.MINIO_ENDPOINT,
+  process.env.WHISPER_URL,
+  process.env.BASE_URL,
   'null'
 ];
 const corsOptions = {
