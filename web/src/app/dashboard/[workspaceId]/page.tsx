@@ -7,6 +7,8 @@ import CreateWorkspace from "@/components/globals/create-workspace";
 import Folders from "@/components/globals/folders";
 import Videos from "@/components/globals/videos";
 
+
+
 const Page = () => {
   const params = useParams<{ workspaceId: string }>();
   const workspaceId = params.workspaceId;

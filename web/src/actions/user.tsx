@@ -294,6 +294,29 @@ export const getUserProfile = async () => {
   }
 };
 
+export const getUser = async () => {
+  const user = await currentUser();
+  if (!user) return { status: 404, data: null };
+
+  const dbUser = await client.user.findUnique({
+    where: { clerkid: user.id },
+    select: {
+      id: true,
+      firstname: true,
+      lastname: true,
+      email: true,
+      image: true,
+      trial:true,
+      subscription: {
+        select: { plan: true },
+      },
+    },
+  });
+
+  if (!dbUser) return { status: 404, data: null };
+  return { status: 200, data: dbUser };
+};
+
 export const getVideoComments = async (id: string) => {
   try {
     const comments = await client.comment.findMany({
