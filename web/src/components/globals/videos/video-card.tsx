@@ -26,7 +26,7 @@ type Props = {
 
 const VideoCard = (props: Props) => {
   const daysAgo = Math.floor(
-    (new Date().getTime() - props.createdAt.getTime()) / (24 * 60 * 60 * 1000)
+    (new Date().getTime() - props.createdAt.getTime()) / (24 * 60 * 60 * 1000),
   );
 
   return (
@@ -54,12 +54,13 @@ const VideoCard = (props: Props) => {
         >
           {" "}
           <video
+            poster={`${process.env.NEXT_PUBLIC_CLOUD_FRONT_STREAM_URL}/${props.source}#t=0.1`}
             controls={false}
             preload="metadata"
             className="w-full aspect-video opacity-50 z-20"
           >
             <source
-              src={`${process.env.NEXT_PUBLIC_CLOUD_FRONT_STREAM_URL}/${props.source}`}
+              src={`${process.env.NEXT_PUBLIC_CLOUD_FRONT_STREAM_URL}/${props.source}#t=0.1`}
             />
           </video>
           <div className="flex flex-col gap-y-2 z-20 px-5 py-3">
@@ -68,9 +69,9 @@ const VideoCard = (props: Props) => {
             </h2>
             <div className="flex gap-x-2 items-center mt-4">
               <Avatar className="w-8 h-8">
-                <AvatarImage src={props.User?.image as string}/>
+                <AvatarImage src={props.User?.image as string} />
                 <AvatarFallback>
-                  <User/>
+                  <User />
                 </AvatarFallback>
               </Avatar>
               <div>
@@ -78,18 +79,14 @@ const VideoCard = (props: Props) => {
                   {props.User?.firstname} {props.User?.lastname}
                 </p>
                 <p className="text-[#707070] text-xs flex items-center">
-                  <Dot/> 
-                  {daysAgo === 0 ? 'Today' : `${daysAgo}d ago`}
+                  <Dot />
+                  {daysAgo === 0 ? "Today" : `${daysAgo}d ago`}
                 </p>
               </div>
             </div>
             <div>
               <span className="flex gap-x-1 items-center">
-                <Share2
-                  fill="#9d9d9d"
-                  className="text-[#9d9d9d]"
-                  size={12}
-                />
+                <Share2 fill="#9d9d9d" className="text-[#9d9d9d]" size={12} />
                 <p className="text-xs text-[#9d9d9d] capitalize">
                   {props.User?.firstname}'s Workspace
                 </p>

@@ -50,7 +50,9 @@ const VideoPreview = ({ videoId }: Props) => {
       <div className="flex flex-col lg:col-span-2 gap-y-6 lg:gap-y-10">
         <div>
           <div className="flex gap-x-3 items-start justify-between">
-            <h2 className="text-white text-2xl md:text-4xl font-bold leading-tight">{video.title}</h2>
+            <h2 className="text-white text-2xl md:text-4xl font-bold leading-tight">
+              {video.title}
+            </h2>
             {author ? (
               <EditVideo
                 videoId={videoId}
@@ -72,6 +74,7 @@ const VideoPreview = ({ videoId }: Props) => {
         </div>
 
         <video
+          poster={`${process.env.NEXT_PUBLIC_CLOUD_FRONT_STREAM_URL}/${video.source}#t=0.1`}
           preload="metadata"
           className={`w-full aspect-video rounded-xl transition-opacity duration-500 ${
             isPlaying ? "opacity-100" : "opacity-50"
@@ -90,7 +93,9 @@ const VideoPreview = ({ videoId }: Props) => {
 
         <div className="flex flex-col gap-y-3">
           <div className="flex gap-x-3 items-center justify-between">
-            <p className="text-[#bdbdbd] font-semibold text-lg md:text-2xl">Description</p>
+            <p className="text-[#bdbdbd] font-semibold text-lg md:text-2xl">
+              Description
+            </p>
             {author ? (
               <EditVideo
                 videoId={videoId}
@@ -101,7 +106,9 @@ const VideoPreview = ({ videoId }: Props) => {
               <></>
             )}
           </div>
-          <p className="text-[#9d9d9d] text-base md:text-lg">{video.description}</p>
+          <p className="text-[#9d9d9d] text-base md:text-lg">
+            {video.description}
+          </p>
         </div>
       </div>
 
