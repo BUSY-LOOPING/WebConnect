@@ -1,0 +1,70 @@
+pipeline {
+    agent any
+
+    environment {
+        GITHUB_TOKEN = credentials('github-token')
+        REPO = 'BUSY-LOOPING/YourElectronRepo' 
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build Electron App') {
+            steps {
+                sh 'npm ci'
+                sh 'npm run build'        // produces your .exe, .dmg etc
+                sh 'npm run dist'         // electron-builder packages it
+            }
+        }
+
+        stage('Create GitHub Release') {
+            steps {
+                script {
+                    def version = sh(
+                        script: "node -p \"require('./package.json').version\"",
+                        returnStdout: true
+                    ).trim()
+
+                    // Create the release
+                    def releaseResponse = sh(
+                        script: """
+                            curl -s -X POST \\
+                            -H "Authorization: token \$GITHUB_TOKEN" \\
+                            -H "Content-Type: application/json" \\
+                            -d '{"tag_name":"v${version}","name":"v${version}","body":"Release v${version}","draft":false,"prerelease":false}' \\
+                            https://api.github.com/repos/\$REPO/releases
+                        """,
+                        returnStdout: true
+                    ).trim()
+
+                    def releaseId = sh(
+                        script: "echo '${releaseResponse}' | grep -o '\"id\": [0-9]*' | head -1 | grep -o '[0-9]*'",
+                        returnStdout: true
+                    ).trim()
+
+                    // Upload each asset (adjust filenames to match your build output)
+                    sh """
+                        curl -s -X POST \\
+                        -H "Authorization: token \$GITHUB_TOKEN" \\
+                        -H "Content-Type: application/octet-stream" \\
+                        --data-binary @dist/YourApp.exe \\
+                        "https://uploads.github.com/repos/\$REPO/releases/\$releaseId/assets?name=YourApp.exe"
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo 'Pipeline failed!'
+        }
+        success {
+            echo 'Release created successfully!'
+        }
+    }
+}

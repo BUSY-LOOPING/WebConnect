@@ -1,42 +1,155 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
-import { Menu, User } from "lucide-react";
+import { Menu, User, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
 
 type Props = {};
 
 const LandingPageNavBar = (props: Props) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab") ?? "home";
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [sidebarOpen]);
+
+  const handleTab = (value: string) => {
+    router.push(`?tab=${value}`, { scroll: false });
+    setSidebarOpen(false);
+  };
+
   return (
-    <div className="flex w-full justify-between items-center">
-      <div className="text-3xl font-semibold flex items-center gap-x-3">
-        <Menu className="w-6 h-6" />
-        <Image
-          className=""
-          alt="logo"
-          src="/main-logo.svg"
-          width={50}
-          height={50}
-        />
-        <span className="">WebConnect</span>
-      </div>
-      <div className="hidden gap-x-10 items-center lg:flex">
-        <Link
-          href="/"
-          className="bg-[#7320DD] py-2 px-5 font-semibold text-lg rounded-full hover:bg-[#7320DD]/80"
+    <>
+      <div className="flex w-full justify-between items-center">
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="lg:hidden p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-colors"
         >
-          Home
-        </Link>
-        <Link href="/">Pricing</Link>
+          <Menu className="w-5 h-5" />
+        </button>
+
+        <div className="text-3xl font-semibold flex items-center gap-x-3">
+          <Image alt="logo" src="/main-logo.svg" width={40} height={40} />
+          <span className="text-white/90 font-semibold">WebConnect</span>
+        </div>
+
+        <div className="hidden gap-x-2 items-center lg:flex">
+          <button
+            onClick={() => handleTab("home")}
+            className={`py-2 px-5 font-semibold text-lg rounded-full transition-colors ${
+              tab === "home"
+                ? "bg-[#7320DD] hover:bg-[#7320DD]/80"
+                : "text-white/50 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            Home
+          </button>
+          <button
+            onClick={() => handleTab("pricing")}
+            className={`py-2 px-5 font-semibold text-lg rounded-full transition-colors ${
+              tab === "pricing"
+                ? "bg-[#7320DD] hover:bg-[#7320DD]/80"
+                : "text-white/50 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            Pricing
+          </button>
+        </div>
+
+        <div className="flex items-center gap-x-3">
+          <Link href="/auth/sign-in">
+            <Button className="text-base flex gap-x-2">
+              <User />
+              Login
+            </Button>
+          </Link>
+        </div>
       </div>
-      <Link href='/auth/sign-in'>
-        <Button className="text-base flex gap-x-2">
-            <User/>
-            Login
-        </Button>
-        
-      </Link>
-    </div>
+
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <div
+        className={`fixed top-0 left-0 h-full w-64 bg-[#111111] border-r border-white/10 z-50 flex flex-col transition-transform duration-300 ease-in-out lg:hidden ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex items-center justify-between px-5 py-5 border-b border-white/10">
+          <div className="flex items-center gap-x-2.5">
+            <Image alt="logo" src="/main-logo.svg" width={32} height={32} />
+            <span className="font-semibold text-lg">WebConnect</span>
+          </div>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/5 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-y-1 p-3 mt-2">
+          <div className="text-xs font-mono uppercase tracking-widest text-white/20 px-3 mb-2">
+            Navigation
+          </div>
+          <button
+            onClick={() => handleTab("home")}
+            className={`flex items-center gap-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-left ${
+              tab === "home"
+                ? "bg-[#7320DD]/15 text-[#7320DD]"
+                : "text-white/50 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                tab === "home" ? "bg-[#7320DD]" : "bg-white/20"
+              }`}
+            />
+            Home
+          </button>
+          <button
+            onClick={() => handleTab("pricing")}
+            className={`flex items-center gap-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-left ${
+              tab === "pricing"
+                ? "bg-[#7320DD]/15 text-[#7320DD]"
+                : "text-white/50 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                tab === "pricing" ? "bg-[#7320DD]" : "bg-white/20"
+              }`}
+            />
+            Pricing
+          </button>
+        </div>
+
+        <div className="mt-auto p-4 border-t border-white/10">
+          <Link href="/auth/sign-in" onClick={() => setSidebarOpen(false)}>
+            <Button className="w-full text-sm flex gap-x-2">
+              <User className="w-4 h-4" />
+              Login
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </>
   );
 };
 
