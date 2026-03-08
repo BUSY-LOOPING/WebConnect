@@ -18,9 +18,7 @@ services:
         NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
     container_name: webconnect-web
     ports:
-      - "${NEXTJS_PORT:-3000}:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:${EXPRESS_PORT:-3001}
+      - "${NEXTJS_PORT:-3000}:${NEXTJS_PORT:-3000}"
     env_file:
       - .env  
     networks:
@@ -34,7 +32,7 @@ services:
     build: ./express
     container_name: webconnect-express
     ports:
-      - "${EXPRESS_PORT:-3001}:3001"
+      - "${EXPRESS_PORT:-3002}:${EXPRESS_PORT:-3002}"
     env_file:
     - .env
     environment:
@@ -51,7 +49,7 @@ services:
     image: onerahmet/openai-whisper-asr-webservice:latest
     container_name: webconnect-whisper
     ports:
-      - "${WHISPER_PORT:-9005}:9000"
+      - "${WHISPER_PORT:-9005}:${WHISPER_PORT:-9005}"
     environment:
       - WHISPER_ASR_WEBSERVICE_MODEL=${WHISPER_MODEL}
     networks:
@@ -72,18 +70,18 @@ services:
     image: quay.io/minio/minio:latest
     container_name: webconnect-minio
     ports:
-      - "${MINIO_PORT:-9000}:9000"
-      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+      - "${MINIO_PORT:-9000}:${MINIO_PORT:-9000}"
+      - "${MINIO_CONSOLE_PORT:-9001}:${MINIO_CONSOLE_PORT:-9001}"
     environment:
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
-    command: server /data --console-address ":9001"
+    command: server /data --console-address ":${MINIO_CONSOLE_PORT:-9001}"
     volumes:
       - minio-data:/data
     networks:
       - webconnect-net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: ["CMD", "curl", "-f", "http://localhost:${MINIO_PORT:-9000}/minio/health/live"]
       interval: 30s
       timeout: 20s
       retries: 3
