@@ -193,16 +193,18 @@ io.on('connection', (socket) => {
                         }
 
                         fs.unlinkSync(audioPath)
+
+                        const stopProcessing = await axios.post(`${process.env.NEXT_API_HOST}recording/${data.userId}/complete`, {
+                            filename: data.filename
+                        })
+
+                        if (stopProcessing.status === 200) {
+                            fs.unlink(videoPath, () => { })
+                        }
                     })
                 })
 
-                const stopProcessing = await axios.post(`${process.env.NEXT_API_HOST}recording/${data.userId}/complete`, {
-                    filename: data.filename
-                })
 
-                if (stopProcessing.status === 200) {
-                    fs.unlink(videoPath, () => { })
-                }
             }
         }
 
