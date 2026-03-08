@@ -9,7 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.34.4",
+    "@aws-sdk/client-s3": "^3.1004.0",
+    "@clerk/nextjs": "^7.0.1",
     "@hookform/error-message": "^2.0.1",
     "@hookform/resolvers": "^5.2.2",
     "@prisma/client": "^6.19.0",
@@ -52,9 +53,9 @@
     "next": "^16.0.8",
     "next-themes": "^0.4.6",
     "nodemailer": "^7.0.11",
-    "react": "19.2.0",
+    "react": "^19.2.3",
     "react-day-picker": "^9.11.1",
-    "react-dom": "19.2.0",
+    "react-dom": "^19.2.3",
     "react-hook-form": "^7.66.0",
     "react-redux": "^9.2.0",
     "react-resizable-panels": "^3.0.6",
