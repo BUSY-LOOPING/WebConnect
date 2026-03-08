@@ -122,7 +122,7 @@ io.on('connection', (socket) => {
                                         ...form.getHeaders(),
                                         'Accept': 'application/json'
                                     },
-                                    timeout: 120000
+                                    timeout: 600000
                                 }
                             )
 

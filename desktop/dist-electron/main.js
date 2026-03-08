@@ -21,7 +21,7 @@ function createWindow() {
     frame: false,
     transparent: true,
     alwaysOnTop: true,
-    focusable: false,
+    focusable: true,
     icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
     webPreferences: {
       preload: path.join(__dirname$1, "preload.mjs"),
@@ -53,6 +53,13 @@ function createWindow() {
   win.setAlwaysOnTop(true, "screen-saver", 1);
   studio.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   studio.setAlwaysOnTop(true, "screen-saver", 1);
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.includes("accounts.google.com") || url.includes("oauth") || url.includes("clerk")) {
+      require("electron").shell.openExternal(url);
+      return { action: "deny" };
+    }
+    return { action: "allow" };
+  });
   win.webContents.on("did-finish-load", () => {
     win == null ? void 0 : win.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
   });

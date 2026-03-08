@@ -40,7 +40,7 @@ function createWindow() {
     frame: false,
     transparent: true,
     alwaysOnTop: true,
-    focusable: false,
+    focusable: true,
     icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
     webPreferences: {
       preload: path.join(__dirname, "preload.mjs"),
@@ -101,6 +101,16 @@ function createWindow() {
   //   floatingWebCam.setAlwaysOnTop(true, "screen-saver", 1);
 
   // Test active push message to Renderer-process.
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.includes('accounts.google.com') ||
+        url.includes('oauth') ||
+        url.includes('clerk')) {
+      require('electron').shell.openExternal(url)
+      return { action: 'deny' }
+    }
+    return { action: 'allow' }
+  })
+  
   win.webContents.on("did-finish-load", () => {
     win?.webContents.send("main-process-message", new Date().toLocaleString());
   });
