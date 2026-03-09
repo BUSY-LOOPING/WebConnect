@@ -76,16 +76,19 @@ pipeline {
         stage('Build Linux (.AppImage)') {
             agent {
                 docker {
-                    image 'electronuserland/builder:wine'  // has Node + electron-builder + wine
-                    args '--privileged'                    
+                    image 'electronuserland/builder:wine'
+                    args '--privileged'
                 }
             }
             steps {
-                dir('desktop') {
-                    sh 'npm ci'
-                    sh 'npm run build'
-                    sh 'npx electron-builder --linux'
-                    stash includes: 'dist/*.AppImage', name: 'linux-build'
+                withCredentials([file(credentialsId: 'webconnect-desktop-env', variable: 'SECURE_ENV')]) {
+                    dir('desktop') {
+                        sh "cp \$SECURE_ENV .env"
+                        sh 'npm ci'
+                        sh 'npm run build'
+                        sh 'npx electron-builder --linux'
+                        stash includes: 'dist/*.AppImage', name: 'linux-build'
+                    }
                 }
             }
         }
