@@ -306,7 +306,7 @@ export const getPreviewVideo = async (videoId: string) => {
   try {
     const user = await currentUser();
     if (!user) {
-      return { status: 400 };
+      return { status: 400, message: 'You must be signed in' };
     }
     const video = await client.video.findUnique({
       where: {

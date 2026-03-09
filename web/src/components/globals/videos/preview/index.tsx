@@ -28,15 +28,14 @@ const VideoPreview = ({ videoId }: Props) => {
     getPreviewVideo(videoId),
   );
 
-  if (isPending || !data)
+  const { data: video, status, author, message } = data as VideoProps;
+  if (!video || message) {
     return (
-      <Loader
-        color={"#fff"}
-        state={true}
-        className="h-screen w-full flex items-center justify-center"
-      />
+      <div className="text-white h-screen flex items-center justify-center">
+        :/ {message ?? 'Video not found'}
+      </div>
     );
-  const { data: video, status, author } = data as VideoProps;
+  }
   useEffect(() => {
     if (status !== 200) router.push("/");
   }, [status]);
@@ -45,6 +44,15 @@ const VideoPreview = ({ videoId }: Props) => {
     (new Date().getTime() - new Date(video.createdAt).getTime()) /
       (24 * 60 * 60 * 1000),
   );
+
+  if (isPending || !data)
+    return (
+      <Loader
+        color={"#fff"}
+        state={true}
+        className="h-screen w-full flex items-center justify-center"
+      />
+    );
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-3 py-6 lg:py-10 overflow-y-auto gap-6 px-4 lg:px-0">

@@ -66,7 +66,7 @@ export type VideosProps = {
 
 export type VideoProps = {
   status: number;
-  data: {
+  data?: {
     User: {
       firstname: string | null;
       lastname: string | null;
@@ -85,8 +85,9 @@ export type VideoProps = {
     processing: boolean;
     summary: string;
   };
-  author: boolean;
-};
+  author?: boolean;
+  message?: string;
+} ;
 
 export type CommentRepliesProp = {
   id: string;
