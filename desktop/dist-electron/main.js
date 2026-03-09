@@ -55,12 +55,14 @@ function createWindow() {
   studio.setAlwaysOnTop(true, "screen-saver", 1);
   win.webContents.on("did-finish-load", () => {
     win == null ? void 0 : win.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
+    win == null ? void 0 : win.webContents.openDevTools({ mode: "detach" });
   });
   studio.webContents.on("did-finish-load", () => {
     studio == null ? void 0 : studio.webContents.send(
       "main-process-message",
       (/* @__PURE__ */ new Date()).toLocaleString()
     );
+    studio == null ? void 0 : studio.webContents.openDevTools({ mode: "detach" });
   });
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);

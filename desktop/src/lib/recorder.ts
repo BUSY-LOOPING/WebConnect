@@ -12,13 +12,14 @@ let socket: ReturnType<typeof io> | null = null;
 const getSocket = () => {
   if (!socket || !socket.connected) {
     socket = io(import.meta.env.VITE_SOCKET_URL as string, {
-      transports: ["websocket", "polling"], // ✅ fallback to polling if websocket fails
+      transports: ["websocket", "polling"], // fallback to polling if websocket fails
       reconnection: true,
     });
 
-    socket.on("connect", () => console.log("🟢 Socket connected", socket?.id));
-    socket.on("disconnect", () => console.log("🔴 Socket disconnected"));
-    socket.on("connect_error", (err) => console.error("Socket error:", err.message));
+    console.log("🔵 Connecting to socket:", import.meta.env.VITE_SOCKET_URL)
+    socket.on("connect", () => console.log("🟢 Socket connected", socket?.id))
+    socket.on("disconnect", () => console.log("🔴 Socket disconnected"))
+    socket.on("connect_error", (err) => console.error("🔴 Socket error:", err.message))
   }
   return socket;
 };
@@ -70,6 +71,8 @@ export const selectSources = async (
   videoElement: React.RefObject<HTMLVideoElement>,
 ) => {
   if (onSources && onSources.screen && onSources.audio && onSources.id) {
+    getSocket()
+
     cleanupStreams();
     if (videoElement?.current) {
       videoElement.current.srcObject = null;

@@ -113,7 +113,7 @@ function createWindow() {
 
   win.webContents.on("did-finish-load", () => {
     win?.webContents.send("main-process-message", new Date().toLocaleString());
-    // win?.webContents.openDevTools({ mode: "detach" }); // opens as separate window
+    win?.webContents.openDevTools({ mode: "detach" }); // opens as separate window
   });
 
   studio.webContents.on("did-finish-load", () => {
@@ -121,7 +121,7 @@ function createWindow() {
       "main-process-message",
       new Date().toLocaleString(),
     );
-        // studio?.webContents.openDevTools({ mode: "detach" });
+        studio?.webContents.openDevTools({ mode: "detach" });
   });
 
   if (VITE_DEV_SERVER_URL) {

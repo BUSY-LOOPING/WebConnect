@@ -12,7 +12,7 @@ export const useStudioSettings = (
   preset?: "HD" | "SD",
   plan?: "PRO" | "FREE",
 ) => {
-    console.log('useStudioSettings called')
+  console.log("useStudioSettings called");
   const [onPreset, setPreset] = useState<"HD" | "SD" | undefined>();
 
   const { register, watch } = useZodForm(updateStudioSettingsSchema, {
@@ -49,8 +49,9 @@ export const useStudioSettings = (
   }, [screen, audio, preset, id, plan]);
 
   useEffect(() => {
-    console.log('watch changed')
+    console.log("watch changed");
     const subscribe = watch((values) => {
+      if (!values.screen || !values.audio || !values.preset) return;
       setPreset(values.preset);
       mutate({
         screen: values.screen!,
@@ -59,16 +60,16 @@ export const useStudioSettings = (
         preset: values.preset!,
       });
       window.ipcRenderer.send("media-sources", {
-        screen:values.screen,
+        screen: values.screen,
         id: id,
-        audio:values.audio,
-        preset:values.preset,
+        audio: values.audio,
+        preset: values.preset,
         plan,
       });
     });
 
-    return () => subscribe.unsubscribe()
-  }, [watch]);
+    return () => subscribe.unsubscribe();
+  }, []);
 
-  return {register, isPending, onPreset}
+  return { register, isPending, onPreset };
 };

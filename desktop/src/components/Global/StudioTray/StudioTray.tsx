@@ -38,19 +38,22 @@ const StudioTray = () => {
   //   });
 
   useEffect(() => {
-  if (!window.ipcRenderer) {
-    console.warn("ipcRenderer not available");
-    return;
-  }
-  const handler = (_: any, payload: any) => {
-    console.log("profile-received payload = ", payload);
-    setOnSources(payload);
-  };
-  window.ipcRenderer.on("profile-received", handler);
-  return () => {
-    window.ipcRenderer.off("profile-received", handler);
-  };
-}, []);
+    if (!window.ipcRenderer) {
+      console.warn("ipcRenderer not available");
+      return;
+    }
+    const handler = (_: any, payload: any) => {
+      setOnSources((prev) => {
+        if (JSON.stringify(prev) === JSON.stringify(payload)) return prev;
+        console.log("profile-received payload = ", payload);
+        return payload;
+      });
+    };
+    window.ipcRenderer.on("profile-received", handler);
+    return () => {
+      window.ipcRenderer.off("profile-received", handler);
+    };
+  }, []);
 
   useEffect(() => {
     if (onSources && onSources.screen) {
