@@ -8,7 +8,12 @@ pipeline {
     stages {
 
         stage('Detect Changes & Bump Version') {
-            agent { label 'linux' }  
+            agent {
+                docker {
+                    image 'node:20-slim'
+                    args '-v /usr/bin/git:/usr/bin/git'  // use host git inside container
+                }
+            }
             steps {
                 script {
                     def changedFiles = sh(
@@ -28,7 +33,6 @@ pipeline {
                         error("Stopping: no desktop changes.")
                     }
 
-                    // Decide bump type from commit message
                     def commitMsg = sh(
                         script: "git log -1 --pretty=%B",
                         returnStdout: true
@@ -37,7 +41,6 @@ pipeline {
                     env.BUMP_TYPE = commitMsg.contains('[major]') ? 'major' : 'minor'
                     echo "Bump type: ${env.BUMP_TYPE}"
 
-                    // Bump version and capture it
                     dir('desktop') {
                         def newVersion = sh(
                             script: "node scripts/bump-version.js ${env.BUMP_TYPE}",
@@ -47,7 +50,6 @@ pipeline {
                         echo "New version: v${env.APP_VERSION}"
                     }
 
-                    // Commit and push the version bump
                     sh """
                         git config user.email "ci@jenkins"
                         git config user.name "Jenkins CI"
@@ -59,20 +61,25 @@ pipeline {
             }
         }
 
-        stage('Build Windows (.exe)') {
-            agent { label 'windows' }   // Your test/build Windows machine
-            steps {
-                dir('desktop') {
-                    bat 'npm ci'
-                    bat 'npm run build'
-                    bat 'npx electron-builder --win'
-                    stash includes: 'dist/*.exe', name: 'windows-build'
-                }
-            }
-        }
+        // stage('Build Windows (.exe)') {
+        //     agent { label 'windows' }  
+        //     steps {
+        //         dir('desktop') {
+        //             bat 'npm ci'
+        //             bat 'npm run build'
+        //             bat 'npx electron-builder --win'
+        //             stash includes: 'dist/*.exe', name: 'windows-build'
+        //         }
+        //     }
+        // }
 
         stage('Build Linux (.AppImage)') {
-            agent { label 'linux' }
+            agent {
+                docker {
+                    image 'electronuserland/builder:wine'  // has Node + electron-builder + wine
+                    args '--privileged'                    
+                }
+            }
             steps {
                 dir('desktop') {
                     sh 'npm ci'
@@ -84,14 +91,18 @@ pipeline {
         }
 
         stage('Release to GitHub') {
-            agent { label 'linux' }
+            agent {
+                docker { image 'node:20-slim' }
+            }
             steps {
-                unstash 'windows-build'
+                sh 'apt-get update && apt-get install -y gh' 
+                // unstash 'windows-build'
                 unstash 'linux-build'
 
+                //dist/*.exe removed
                 sh """
                     gh release create v${env.APP_VERSION} \
-                        dist/*.exe dist/*.AppImage \
+                        dist/*.AppImage \
                         --title "Release v${env.APP_VERSION}" \
                         --notes "Bump type: ${env.BUMP_TYPE}" \
                         --repo BUSY-LOOPING/WebConnect
@@ -101,7 +112,7 @@ pipeline {
     }
 
     post {
-        success { echo "✅ Released v${env.APP_VERSION}" }
-        failure  { echo "❌ Pipeline failed" }
+        success { echo "Released v${env.APP_VERSION}" }
+        failure  { echo "Pipeline failed" }
     }
 }
