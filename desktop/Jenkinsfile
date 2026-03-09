@@ -6,18 +6,26 @@ pipeline {
     }
 
     stages {
-
         stage('Detect Changes & Bump Version') {
             agent {
                 docker {
                     image 'node:20-bullseye'
-                    
                 }
             }
             steps {
                 script {
+                    def commitAuthor = sh(
+                        script: 'git log -1 --pretty=%an',
+                        returnStdout: true
+                    ).trim()
+
+                    if (commitAuthor == 'Jenkins CI') {
+                        echo 'Commit is from Jenkins CI — skipping pipeline.'
+                        currentBuild.result = 'NOT_BUILT'
+                        error('Stopping: Jenkins CI commit.')
+                    }
                     def changedFiles = sh(
-                        script: "git diff --name-only HEAD~1 HEAD",
+                        script: 'git diff --name-only HEAD~1 HEAD',
                         returnStdout: true
                     ).trim()
 
@@ -28,13 +36,13 @@ pipeline {
                     }
 
                     if (!hasDesktopChanges) {
-                        echo "No changes in desktop/ — skipping."
+                        echo 'No changes in desktop/ — skipping.'
                         currentBuild.result = 'NOT_BUILT'
-                        error("Stopping: no desktop changes.")
+                        error('Stopping: no desktop changes.')
                     }
 
                     def commitMsg = sh(
-                        script: "git log -1 --pretty=%B",
+                        script: 'git log -1 --pretty=%B',
                         returnStdout: true
                     ).trim().toLowerCase()
 
@@ -62,7 +70,7 @@ pipeline {
         }
 
         // stage('Build Windows (.exe)') {
-        //     agent { label 'windows' }  
+        //     agent { label 'windows' }
         //     steps {
         //         dir('desktop') {
         //             bat 'npm ci'
@@ -114,6 +122,6 @@ pipeline {
 
     post {
         success { echo "Released v${env.APP_VERSION}" }
-        failure  { echo "Pipeline failed" }
+        failure  { echo 'Pipeline failed' }
     }
 }
