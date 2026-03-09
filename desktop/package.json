@@ -1,6 +1,8 @@
 {
   "name": "webconnect",
   "productName": "WebConnect",
+  "description": "WebConnect Desktop App",
+  "author": "BUSY-LOOPING",
   "private": true,
   "version": "0.13.0",
   "type": "module",
@@ -24,6 +26,10 @@
       "target": "AppImage",
       "artifactName": "WebConnect-${version}.AppImage"
     }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BUSY-LOOPING/WebConnect.git"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.8.0",
