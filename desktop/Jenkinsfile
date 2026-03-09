@@ -108,14 +108,15 @@ pipeline {
             steps {
                 sh 'apt-get update && apt-get install -y gh ca-certificates'
                 unstash 'linux-build'
-                sh "echo \${GH_TOKEN} | gh auth login --with-token"
-                sh """
-                    gh release create v${env.APP_VERSION} \
-                        dist/WebConnect-${env.APP_VERSION}.AppImage \
-                        --title "Release v${env.APP_VERSION}" \
-                        --notes "Bump type: ${env.BUMP_TYPE}" \
-                        --repo BUSY-LOOPING/WebConnect
-                """
+                withEnv(["GITHUB_TOKEN=${env.GH_TOKEN}"]) {
+                    sh """
+                gh release create v${env.APP_VERSION} \
+                    dist/WebConnect-${env.APP_VERSION}.AppImage \
+                    --title "Release v${env.APP_VERSION}" \
+                    --notes "Bump type: ${env.BUMP_TYPE}" \
+                    --repo BUSY-LOOPING/WebConnect
+            """
+                }
             }
         }
     }
