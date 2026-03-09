@@ -1,70 +1,107 @@
 pipeline {
-    agent any
+    agent none
 
     environment {
-        GITHUB_TOKEN = credentials('github-token')
-        REPO = 'BUSY-LOOPING/YourElectronRepo' 
+        GH_TOKEN = credentials('github-token')
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
 
-        stage('Build Electron App') {
-            steps {
-                sh 'npm ci'
-                sh 'npm run build'        // produces your .exe, .dmg etc
-                sh 'npm run dist'         // electron-builder packages it
-            }
-        }
-
-        stage('Create GitHub Release') {
+        stage('Detect Changes & Bump Version') {
+            agent { label 'linux' }  
             steps {
                 script {
-                    def version = sh(
-                        script: "node -p \"require('./package.json').version\"",
+                    def changedFiles = sh(
+                        script: "git diff --name-only HEAD~1 HEAD",
                         returnStdout: true
                     ).trim()
 
-                    // Create the release
-                    def releaseResponse = sh(
-                        script: """
-                            curl -s -X POST \\
-                            -H "Authorization: token \$GITHUB_TOKEN" \\
-                            -H "Content-Type: application/json" \\
-                            -d '{"tag_name":"v${version}","name":"v${version}","body":"Release v${version}","draft":false,"prerelease":false}' \\
-                            https://api.github.com/repos/\$REPO/releases
-                        """,
-                        returnStdout: true
-                    ).trim()
+                    echo "Changed files:\n${changedFiles}"
 
-                    def releaseId = sh(
-                        script: "echo '${releaseResponse}' | grep -o '\"id\": [0-9]*' | head -1 | grep -o '[0-9]*'",
-                        returnStdout: true
-                    ).trim()
+                    def hasDesktopChanges = changedFiles.split('\n').any {
+                        it.startsWith('desktop/')
+                    }
 
-                    // Upload each asset (adjust filenames to match your build output)
+                    if (!hasDesktopChanges) {
+                        echo "No changes in desktop/ — skipping."
+                        currentBuild.result = 'NOT_BUILT'
+                        error("Stopping: no desktop changes.")
+                    }
+
+                    // Decide bump type from commit message
+                    def commitMsg = sh(
+                        script: "git log -1 --pretty=%B",
+                        returnStdout: true
+                    ).trim().toLowerCase()
+
+                    env.BUMP_TYPE = commitMsg.contains('[major]') ? 'major' : 'minor'
+                    echo "Bump type: ${env.BUMP_TYPE}"
+
+                    // Bump version and capture it
+                    dir('desktop') {
+                        def newVersion = sh(
+                            script: "node scripts/bump-version.js ${env.BUMP_TYPE}",
+                            returnStdout: true
+                        ).trim()
+                        env.APP_VERSION = newVersion
+                        echo "New version: v${env.APP_VERSION}"
+                    }
+
+                    // Commit and push the version bump
                     sh """
-                        curl -s -X POST \\
-                        -H "Authorization: token \$GITHUB_TOKEN" \\
-                        -H "Content-Type: application/octet-stream" \\
-                        --data-binary @dist/YourApp.exe \\
-                        "https://uploads.github.com/repos/\$REPO/releases/\$releaseId/assets?name=YourApp.exe"
+                        git config user.email "ci@jenkins"
+                        git config user.name "Jenkins CI"
+                        git add desktop/package.json
+                        git commit -m "chore: bump version to v${env.APP_VERSION} [skip ci]"
+                        git push https://${GH_TOKEN}@github.com/BUSY-LOOPING/WebConnect.git HEAD:main
                     """
                 }
+            }
+        }
+
+        stage('Build Windows (.exe)') {
+            agent { label 'windows' }   // Your test/build Windows machine
+            steps {
+                dir('desktop') {
+                    bat 'npm ci'
+                    bat 'npm run build'
+                    bat 'npx electron-builder --win'
+                    stash includes: 'dist/*.exe', name: 'windows-build'
+                }
+            }
+        }
+
+        stage('Build Linux (.AppImage)') {
+            agent { label 'linux' }
+            steps {
+                dir('desktop') {
+                    sh 'npm ci'
+                    sh 'npm run build'
+                    sh 'npx electron-builder --linux'
+                    stash includes: 'dist/*.AppImage', name: 'linux-build'
+                }
+            }
+        }
+
+        stage('Release to GitHub') {
+            agent { label 'linux' }
+            steps {
+                unstash 'windows-build'
+                unstash 'linux-build'
+
+                sh """
+                    gh release create v${env.APP_VERSION} \
+                        dist/*.exe dist/*.AppImage \
+                        --title "Release v${env.APP_VERSION}" \
+                        --notes "Bump type: ${env.BUMP_TYPE}" \
+                        --repo BUSY-LOOPING/WebConnect
+                """
             }
         }
     }
 
     post {
-        failure {
-            echo 'Pipeline failed!'
-        }
-        success {
-            echo 'Release created successfully!'
-        }
+        success { echo "✅ Released v${env.APP_VERSION}" }
+        failure  { echo "❌ Pipeline failed" }
     }
 }

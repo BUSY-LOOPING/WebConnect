@@ -1,5 +1,6 @@
 {
-  "name": "webconnect-desktop",
+  "name": "webconnect",
+  "productName": "WebConnect",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -8,6 +9,19 @@
     "build": "tsc && vite build && electron-builder",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
+  },
+  "build": {
+    "appId": "com.busylooping.webconnect",
+    "productName": "WebConnect",
+    "directories": { "output": "dist" },
+    "win": {
+      "target": "nsis",
+      "artifactName": "WebConnect-Setup-${version}.exe"
+    },
+    "linux": {
+      "target": "AppImage",
+      "artifactName": "WebConnect-${version}.AppImage"
+    }
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.8.0",
