@@ -36,7 +36,9 @@ export const useSearch = (key: string, type: "USERS") => {
       if (type === "USERS") {
         const users = await searchUsers(queryKey[1] as string);
         if (users.status === 200) setOnUsers(users.data);
+        return users;
       }
+      return { status: 404, data: [] };
     },
     false
   );

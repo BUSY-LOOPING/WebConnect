@@ -4,7 +4,7 @@ import { useQueryData } from "./useQueryData";
 import useZodForm from "./useZodForm";
 import { createCommentAndReply, getUserProfile } from "@/actions/user";
 
-export const useVideoComment = (videoId: string, commentId: string) => {
+export const useVideoComment = (videoId: string, commentId?: string) => {
   const { data } = useQueryData(["user-profile"], getUserProfile);
 
   const { status, data: user } = data as {

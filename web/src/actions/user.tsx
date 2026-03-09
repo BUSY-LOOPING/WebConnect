@@ -150,9 +150,9 @@ export const searchUsers = async (query: string) => {
       return { status: 200, data: users };
     }
 
-    return { status: 404, data: undefined };
+    return { status: 404, data: [] };
   } catch (error) {
-    return { status: 400, data: undefined };
+    return { status: 400, data: [] };
   }
 };
 
@@ -391,11 +391,125 @@ export const inviteMembers = async (
         });
 
         if (invitation) {
+          
+          const emailHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>You're Invited to WebConnect</title>
+</head>
+<body style="margin:0;padding:0;background-color:#0d0d0d;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0d0d0d;padding:48px 16px;">
+    <tr>
+      <td align="center">
+        <table width="540" cellpadding="0" cellspacing="0" style="max-width:540px;width:100%;">
+
+          <!-- Logo Header -->
+          <tr>
+            <td align="center" style="padding-bottom:32px;">
+              <table cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding-left:10px;vertical-align:middle;">
+                    <span style="color:#ffffff;font-size:17px;font-weight:600;letter-spacing:-0.2px;">WebConnect</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="background-color:#161616;border-radius:14px;border:1px solid #2a2a2a;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding:40px 40px 36px;">
+
+                    <!-- Heading -->
+                    <h1 style="margin:0 0 8px;color:#ffffff;font-size:24px;font-weight:700;letter-spacing:-0.4px;line-height:1.25;">
+                      You've been invited
+                    </h1>
+                    <p style="margin:0 0 28px;color:#888888;font-size:14px;line-height:1.6;">
+                      <span style="color:#cccccc;font-weight:500;">${senderInfo.firstname} ${senderInfo.lastname}</span>
+                      &nbsp;invited you to join a workspace on WebConnect.
+                    </p>
+
+                    <!-- Info block -->
+                    <table width="100%" cellpadding="0" cellspacing="0"
+                      style="background:#1e1e1e;border:1px solid #2a2a2a;border-radius:10px;margin-bottom:24px;">
+                      <tr>
+                        <td style="padding:18px 22px;">
+                          <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="vertical-align:middle;">
+                                <div style="width:36px;height:36px;background:#ffffff;border-radius:8px;text-align:center;line-height:36px;display:inline-block;vertical-align:middle;">
+                                  <span style="color:#0d0d0d;font-size:15px;font-weight:800;">${workspace.name.charAt(0).toUpperCase()}</span>
+                                </div>
+                                <span style="display:inline-block;vertical-align:middle;padding-left:12px;">
+                                  <span style="display:block;color:#666666;font-size:11px;text-transform:uppercase;letter-spacing:0.8px;font-weight:600;margin-bottom:2px;">Workspace</span>
+                                  <span style="display:block;color:#ffffff;font-size:14px;font-weight:600;">${workspace.name}</span>
+                                </span>
+                              </td>
+                              <td align="right" style="vertical-align:middle;">
+                                <span style="background:#252525;color:#666666;font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid #333333;">
+                                  Pending
+                                </span>
+                              </td>
+                            </tr>
+                          </table>
+
+                          <div style="height:1px;background:#252525;margin:16px 0;"></div>
+
+                          <table cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td>
+                                <span style="display:block;color:#666666;font-size:11px;text-transform:uppercase;letter-spacing:0.8px;font-weight:600;margin-bottom:3px;">Invited by</span>
+                                <span style="color:#aaaaaa;font-size:13px;">${senderInfo.firstname} ${senderInfo.lastname}</span>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Single CTA -->
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td>
+                          <a href="${process.env.NEXT_PUBLIC_HOST_URL}/invite/${invitation.id}"
+                            style="display:block;background:#ffffff;color:#0d0d0d;text-decoration:none;font-size:14px;font-weight:700;padding:14px 24px;border-radius:8px;text-align:center;">
+                            Accept Invitation
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:24px 0 0;">
+              <p style="margin:0;color:#333333;font-size:12px;text-align:center;line-height:1.6;">
+                You received this because someone invited you to a WebConnect workspace.<br/>
+                If you weren't expecting this, you can safely ignore it.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
           const { transporter, mailOptions } = await sendEmail(
             email,
-            "You got an invitation",
-            `You are invited to join ${workspace.name} Workspace, click accept to confirm`,
-            `<a href="${process.env.NEXT_PUBLIC_HOST_URL}/invite/${invitation.id}" style="background-color: #000; padding: 5px 10px: border-radius: 10px;">Accept Invite</a>`,
+            `You're invited to join ${workspace.name} on WebConnect`,
+            `${senderInfo.firstname} ${senderInfo.lastname} invited you to join ${workspace.name}. Accept here: ${process.env.NEXT_PUBLIC_HOST_URL}/invite/${invitation.id}`,
+            emailHtml,
           );
           transporter.sendMail(mailOptions, async (error, info) => {
             if (error) {

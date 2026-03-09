@@ -17,6 +17,7 @@ const useZodForm = (
   } = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: { ...defaultValues },
+    mode: "onChange",
   });
 
   const onFormSubmit = handleSubmit(async(values) => mutation({ ...values }))

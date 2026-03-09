@@ -34,11 +34,10 @@ const AiTools = ({ plan, trial, videoId }: Props) => {
           </h2>
           <StarsIcon color="#a22fe0" fill="#a22fe0" />
         </div>
-        {/* feature rows */}
         {[
           {
-            title: "Summary",
-            desc: "Generate a description for your video using AI.",
+            title: "Title",
+            desc: "Generate a title for your video using AI.",
           },
           {
             title: "Summary",
