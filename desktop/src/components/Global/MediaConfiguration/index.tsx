@@ -1,7 +1,7 @@
 import { SourceDeviceStateProps } from "@/hooks/useMediaResouce";
 import { useStudioSettings } from "@/hooks/useStudioSettings";
 import { Loader } from "../Loader";
-import { Headphones, Monitor, Settings, Settings2 } from "lucide-react";
+import { Headphones, Monitor, Settings2 } from "lucide-react";
 type Props = {
   state: SourceDeviceStateProps;
   user:
@@ -43,6 +43,9 @@ const MediaConfiguration = ({ state, user }: Props) => {
     user?.studio?.preset,
     user?.subscription?.plan,
   );
+  if (!state.displays?.length || !state.audioInputs?.length) {
+    return <Loader />;
+  }
   return (
     <form className="flex h-full relative w-full flex-col gap-y-5">
       {isPending && (
@@ -94,30 +97,28 @@ const MediaConfiguration = ({ state, user }: Props) => {
         </select>
       </div>
       <div className="flex gap-x-5 justify-center items-center">
-        <Settings2
-            color="#575655"
-            size={36}/>
-            <select
-                {...register('preset')}
-                className="outline-none cursor-pointer px-5 py-2 rounded-xl border-2 text-white border-[#575655] bg-transparent w-full"
-            >
-                <option
-                    disabled={user?.subscription?.plan === 'FREE'}
-                    selected={onPreset === 'HD' || user?.studio?.preset === 'HD'}
-                    value={'HD'}
-                    className="bg-[#171717] cursor-pointer"
-                >
-                    1080p{' '}
-                    {user?.subscription?.plan === 'FREE' && '(Upgrade to PRO plan)'}
-                </option>
-                <option
-                    selected={onPreset === 'SD' || user?.studio?.preset === 'SD'}
-                    value={'SD'}
-                    className="bg-[#171717] cursor-pointer"
-                >
-                    720p
-                </option>
-            </select>
+        <Settings2 color="#575655" size={36} />
+        <select
+          {...register("preset")}
+          className="outline-none cursor-pointer px-5 py-2 rounded-xl border-2 text-white border-[#575655] bg-transparent w-full"
+        >
+          <option
+            disabled={user?.subscription?.plan === "FREE"}
+            selected={onPreset === "HD" || user?.studio?.preset === "HD"}
+            value={"HD"}
+            className="bg-[#171717] cursor-pointer"
+          >
+            1080p{" "}
+            {user?.subscription?.plan === "FREE" && "(Upgrade to PRO plan)"}
+          </option>
+          <option
+            selected={onPreset === "SD" || user?.studio?.preset === "SD"}
+            value={"SD"}
+            className="bg-[#171717] cursor-pointer"
+          >
+            720p
+          </option>
+        </select>
       </div>
     </form>
   );

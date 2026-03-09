@@ -7,6 +7,10 @@ import tsConfigPaths from "vite-tsconfig-paths";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  optimizeDeps: {
+    exclude: ["tailwindcss"],
+    include: [],
+  },
   build: {
     emptyOutDir: false,
     manifest: true,
@@ -29,9 +33,9 @@ export default defineConfig({
     },
   },
   plugins: [
+    tailwindcss(),
     react(),
     tsConfigPaths(),
-    tailwindcss(),
     electron({
       main: {
         // Shortcut of `build.lib.entry`.
@@ -50,7 +54,7 @@ export default defineConfig({
         //   },
         // },
       },
-      
+
       preload: {
         // Shortcut of `build.rollupOptions.input`.
         // Preload scripts may contain Web assets, so use the `build.rollupOptions.input` instead `build.lib.entry`.

@@ -30,10 +30,10 @@ let studio: BrowserWindow | null;
 
 function createWindow() {
   win = new BrowserWindow({
-    titleBarStyle: 'hidden',
+    // titleBarStyle: "hidden",
     maxWidth: 600,
     height: 400,
-    minWidth:300,
+    minWidth: 300,
     // minWidth: 300,
     // minHeight: 600,
     hasShadow: false,
@@ -53,18 +53,18 @@ function createWindow() {
   studio = new BrowserWindow({
     width: 300,
     height: 200,
-    minWidth:200,
-    maxWidth:400,
+    minWidth: 200,
+    maxWidth: 400,
     maxHeight: 500,
     frame: false,
-    hasShadow:false,
+    hasShadow: false,
     transparent: true,
     alwaysOnTop: true,
-    focusable: false,
+    focusable: true,
     icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
     webPreferences: {
       preload: path.join(__dirname, "preload.mjs"),
-      nodeIntegration: false,
+      nodeIntegration: true,
       contextIsolation: true,
       devTools: true,
     },
@@ -95,24 +95,25 @@ function createWindow() {
   studio.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   studio.setAlwaysOnTop(true, "screen-saver", 1);
 
-//   win.setIgnoreMouseEvents(true, { forward: true });
-//   studio.setIgnoreMouseEvents(true, { forward: true });
+  //   win.setIgnoreMouseEvents(true, { forward: true });
+  //   studio.setIgnoreMouseEvents(true, { forward: true });
   //   floatingWebCam.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   //   floatingWebCam.setAlwaysOnTop(true, "screen-saver", 1);
 
   // Test active push message to Renderer-process.
-  win.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.includes('accounts.google.com') ||
-        url.includes('oauth') ||
-        url.includes('clerk')) {
-      require('electron').shell.openExternal(url)
-      return { action: 'deny' }
-    }
-    return { action: 'allow' }
-  })
-  
+  //   win.webContents.setWindowOpenHandler(({ url }) => {
+  //     if (url.includes('accounts.google.com') ||
+  //         url.includes('oauth') ||
+  //         url.includes('clerk')) {
+  //       require('electron').shell.openExternal(url)
+  //       return { action: 'deny' }
+  //     }
+  //     return { action: 'allow' }
+  //   })
+
   win.webContents.on("did-finish-load", () => {
     win?.webContents.send("main-process-message", new Date().toLocaleString());
+    // win?.webContents.openDevTools({ mode: "detach" }); // opens as separate window
   });
 
   studio.webContents.on("did-finish-load", () => {
@@ -120,19 +121,12 @@ function createWindow() {
       "main-process-message",
       new Date().toLocaleString(),
     );
+        // studio?.webContents.openDevTools({ mode: "detach" });
   });
-
-    win.webContents.on("did-finish-load", () => {
-      win?.webContents.openDevTools({ mode: "detach" }); // opens as separate window
-    });
-
-  //   studio.webContents.on("did-finish-load", () => {
-  //     studio?.webContents.openDevTools({ mode: "detach" });
-  //   });
 
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
-    studio.loadURL(`${import.meta.env.VITE_APP_URL}/studio.html`);
+    studio.loadURL(`${VITE_DEV_SERVER_URL}/studio.html`);
     // floatingWebCam.loadURL(`${import.meta.env.VITE_APP_URL}/webcam.html`);
   } else {
     // win.loadFile('dist/index.html')
@@ -183,12 +177,12 @@ ipcMain.handle("getSources", async () => {
   }
 });
 
-ipcMain.on("media-sources", (event, payload) => {
+ipcMain.on("media-sources", (_, payload) => {
   //console.log('profile-received main.ts payload = ', payload)
   studio?.webContents.send("profile-received", payload);
 });
 
-ipcMain.on("resize-studio", (event, payload) => {
+ipcMain.on("resize-studio", (_, payload) => {
   //console.log(event)
   if (payload.shrink) {
     studio?.setSize(400, 100);
@@ -198,7 +192,7 @@ ipcMain.on("resize-studio", (event, payload) => {
   }
 });
 
-ipcMain.on("hide-plugin", (event, payload) => {
+ipcMain.on("hide-plugin", (_, payload) => {
   //console.log(event)
   win?.webContents.send("hide-plugin", payload);
 });

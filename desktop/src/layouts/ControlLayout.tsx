@@ -12,7 +12,7 @@ type Props = {
 const ControlLayout = ({ children, className }: Props) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
 
-  window.ipcRenderer.on("hide-plugin", (event, payload) => {
+  window.ipcRenderer.on("hide-plugin", (_, payload) => {
     //(event);
     setIsVisible(payload.state);
   });

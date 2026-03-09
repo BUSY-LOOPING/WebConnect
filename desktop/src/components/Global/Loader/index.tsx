@@ -1,3 +1,7 @@
+type Props = {
+    color?: string
+}
+
 export const Loader = ({ color }: Props) => {
   return (
     <svg

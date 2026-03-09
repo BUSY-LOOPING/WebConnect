@@ -11,7 +11,7 @@ let win;
 let studio;
 function createWindow() {
   win = new BrowserWindow({
-    titleBarStyle: "hidden",
+    // titleBarStyle: "hidden",
     maxWidth: 600,
     height: 400,
     minWidth: 300,
@@ -40,11 +40,11 @@ function createWindow() {
     hasShadow: false,
     transparent: true,
     alwaysOnTop: true,
-    focusable: false,
+    focusable: true,
     icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
     webPreferences: {
       preload: path.join(__dirname$1, "preload.mjs"),
-      nodeIntegration: false,
+      nodeIntegration: true,
       contextIsolation: true,
       devTools: true
     }
@@ -53,13 +53,6 @@ function createWindow() {
   win.setAlwaysOnTop(true, "screen-saver", 1);
   studio.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   studio.setAlwaysOnTop(true, "screen-saver", 1);
-  win.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.includes("accounts.google.com") || url.includes("oauth") || url.includes("clerk")) {
-      require("electron").shell.openExternal(url);
-      return { action: "deny" };
-    }
-    return { action: "allow" };
-  });
   win.webContents.on("did-finish-load", () => {
     win == null ? void 0 : win.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
   });
@@ -69,12 +62,9 @@ function createWindow() {
       (/* @__PURE__ */ new Date()).toLocaleString()
     );
   });
-  win.webContents.on("did-finish-load", () => {
-    win == null ? void 0 : win.webContents.openDevTools({ mode: "detach" });
-  });
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
-    studio.loadURL(`${"http://localhost:5173"}/studio.html`);
+    studio.loadURL(`${VITE_DEV_SERVER_URL}/studio.html`);
   } else {
     win.loadFile(path.join(RENDERER_DIST, "index.html"));
     studio.loadFile(path.join(RENDERER_DIST, "studio.html"));
@@ -106,10 +96,10 @@ ipcMain.handle("getSources", async () => {
     throw error;
   }
 });
-ipcMain.on("media-sources", (event, payload) => {
+ipcMain.on("media-sources", (_, payload) => {
   studio == null ? void 0 : studio.webContents.send("profile-received", payload);
 });
-ipcMain.on("resize-studio", (event, payload) => {
+ipcMain.on("resize-studio", (_, payload) => {
   if (payload.shrink) {
     studio == null ? void 0 : studio.setSize(400, 100);
   }
@@ -117,7 +107,7 @@ ipcMain.on("resize-studio", (event, payload) => {
     studio == null ? void 0 : studio.setSize(400, 250);
   }
 });
-ipcMain.on("hide-plugin", (event, payload) => {
+ipcMain.on("hide-plugin", (_, payload) => {
   win == null ? void 0 : win.webContents.send("hide-plugin", payload);
 });
 app.on("activate", () => {

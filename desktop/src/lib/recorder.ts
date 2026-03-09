@@ -5,8 +5,32 @@ import io from "socket.io-client";
 let videoTransferFileName: string | undefined;
 let mediaRecorder: MediaRecorder;
 let userId: string;
+let activeStreams: MediaStream[] = [];
 
-const socket = io(import.meta.env.VITE_SOCKET_URL as string);
+let socket: ReturnType<typeof io> | null = null;
+
+const getSocket = () => {
+  if (!socket || !socket.connected) {
+    socket = io(import.meta.env.VITE_SOCKET_URL as string, {
+      transports: ["websocket", "polling"], // ✅ fallback to polling if websocket fails
+      reconnection: true,
+    });
+
+    socket.on("connect", () => console.log("🟢 Socket connected", socket?.id));
+    socket.on("disconnect", () => console.log("🔴 Socket disconnected"));
+    socket.on("connect_error", (err) => console.error("Socket error:", err.message));
+  }
+  return socket;
+};
+
+const cleanupStreams = () => {
+  activeStreams.forEach((stream) => {
+    stream.getTracks().forEach((track) => {
+      track.stop();
+    });
+  });
+  activeStreams = [];
+};
 
 export const startRecording = (onSources: {
   screen: string;
@@ -21,7 +45,7 @@ export const startRecording = (onSources: {
 export const onStopRecording = () => mediaRecorder.stop();
 
 export const onDataAvailable = (e: BlobEvent) => {
-  socket.emit("video-chunks", {
+  getSocket().emit("video-chunks", {
     chunks: e.data,
     filename: videoTransferFileName,
   });
@@ -29,10 +53,11 @@ export const onDataAvailable = (e: BlobEvent) => {
 
 const stopRecording = () => {
   hidePluginWindow(false);
-  socket.emit("process-video", {
+  getSocket().emit("process-video", {
     filename: videoTransferFileName,
     userId,
   });
+  cleanupStreams();
 };
 
 export const selectSources = async (
@@ -45,6 +70,11 @@ export const selectSources = async (
   videoElement: React.RefObject<HTMLVideoElement>,
 ) => {
   if (onSources && onSources.screen && onSources.audio && onSources.id) {
+    cleanupStreams();
+    if (videoElement?.current) {
+      videoElement.current.srcObject = null;
+    }
+
     const constraints: any = {
       audio: false,
       video: {
@@ -63,6 +93,7 @@ export const selectSources = async (
     userId = onSources.id;
 
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    activeStreams.push(stream); 
 
     //audio and webcam stream
     const audioStream = await navigator.mediaDevices.getUserMedia({
@@ -71,6 +102,7 @@ export const selectSources = async (
         ? { deviceId: { exact: onSources.audio } }
         : false,
     });
+    activeStreams.push(audioStream);
 
     if (videoElement && videoElement.current) {
       videoElement.current.srcObject = stream;
@@ -89,4 +121,12 @@ export const selectSources = async (
     mediaRecorder.ondataavailable = onDataAvailable;
     mediaRecorder.onstop = stopRecording;
   }
+};
+
+export const destroyRecorder = () => {
+  cleanupStreams();
+  if (mediaRecorder && mediaRecorder.state !== "inactive") {
+    mediaRecorder.stop();
+  }
+//   socket.disconnect();
 };

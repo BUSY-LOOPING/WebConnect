@@ -1,5 +1,10 @@
-import { onStopRecording, selectSources, startRecording } from "@/lib/recorder";
-import { cn, resizeWindow, videoRecordingTime } from "@/lib/utils";
+import {
+  destroyRecorder,
+  onStopRecording,
+  selectSources,
+  startRecording,
+} from "@/lib/recorder";
+import { cn, videoRecordingTime } from "@/lib/utils";
 import { Cast, Pause, Square } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -27,31 +32,32 @@ const StudioTray = () => {
     setCount(0);
   };
 
-//   const handleMouseEnter = () => {
-//     window.ipcRenderer.send("set-ignore-mouse-events", false);
-//   };
+  //   window.ipcRenderer.on("profile-received", (_, payload) => {
+  //     console.log("profile-received payload = ", payload);
+  //     setOnSources(payload);
+  //   });
 
-//   const handleMouseLeave = () => {
-//     window.ipcRenderer.send("set-ignore-mouse-events", true);
-//   };
-
-  window.ipcRenderer.on("profile-received", (event, payload) => {
+  useEffect(() => {
+  if (!window.ipcRenderer) {
+    console.warn("ipcRenderer not available");
+    return;
+  }
+  const handler = (_: any, payload: any) => {
     console.log("profile-received payload = ", payload);
     setOnSources(payload);
-  });
-
-  //   useEffect(() => {
-  //     resizeWindow(preview);
-
-  //     return () => resizeWindow(preview);
-  //   }, [preview]);
+  };
+  window.ipcRenderer.on("profile-received", handler);
+  return () => {
+    window.ipcRenderer.off("profile-received", handler);
+  };
+}, []);
 
   useEffect(() => {
     if (onSources && onSources.screen) {
       selectSources(onSources, videoElement);
     }
     return () => {
-      selectSources(onSources!, videoElement);
+      destroyRecorder();
     };
   }, [onSources]);
 
@@ -79,8 +85,8 @@ const StudioTray = () => {
     <></>
   ) : (
     <div
-    //   onMouseEnter={handleMouseEnter}
-    //   onMouseLeave={handleMouseLeave}
+      //   onMouseEnter={handleMouseEnter}
+      //   onMouseLeave={handleMouseLeave}
       className="flex flex-col justify-end gap-y-5 h-screen"
     >
       {preview && (

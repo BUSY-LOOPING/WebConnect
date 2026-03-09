@@ -15,7 +15,7 @@ export const useStudioSettings = (
     console.log('useStudioSettings called')
   const [onPreset, setPreset] = useState<"HD" | "SD" | undefined>();
 
-  const { register, watch, reset } = useZodForm(updateStudioSettingsSchema, {
+  const { register, watch } = useZodForm(updateStudioSettingsSchema, {
     screen: screen!,
     audio: audio!,
     preset: preset!,
@@ -31,7 +31,7 @@ export const useStudioSettings = (
     }) => updateStudioSettings(data.id, data.screen, data.audio, data.preset),
     onSuccess: (data) => {
       return toast(data.status === 200 ? "Success" : "Error", {
-        description: data.message,
+        description: data.data.message,
       });
     },
   });
@@ -46,7 +46,7 @@ export const useStudioSettings = (
         plan,
       });
     }
-  }, [screen, audio, preset]);
+  }, [screen, audio, preset, id, plan]);
 
   useEffect(() => {
     console.log('watch changed')

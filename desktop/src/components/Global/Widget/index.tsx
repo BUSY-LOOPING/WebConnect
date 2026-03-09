@@ -1,5 +1,5 @@
 import { ClerkLoading, SignedIn, useUser } from "@clerk/clerk-react";
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import { Loader } from "../Loader";
 import { fetchUserProfile } from "@/lib/utils";
 import { useMediaResource } from "@/hooks/useMediaResouce";
