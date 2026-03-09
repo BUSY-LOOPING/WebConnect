@@ -10,8 +10,8 @@ pipeline {
         stage('Detect Changes & Bump Version') {
             agent {
                 docker {
-                    image 'node:20-slim'
-                    args '-v /usr/bin/git:/usr/bin/git'  // use host git inside container
+                    image 'node:20-bullseye'
+                    
                 }
             }
             steps {
