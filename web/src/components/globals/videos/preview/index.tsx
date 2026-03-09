@@ -28,9 +28,7 @@ const VideoPreview = ({ videoId }: Props) => {
     getPreviewVideo(videoId),
   );
 
-  const notifyFirstView = async () => await sendEmailForFirstView(videoId);
-
-  if (isPending)
+  if (isPending || !data)
     return (
       <Loader
         color={"#fff"}
@@ -39,10 +37,13 @@ const VideoPreview = ({ videoId }: Props) => {
       />
     );
   const { data: video, status, author } = data as VideoProps;
-  if (status !== 200) router.push("/");
+  useEffect(() => {
+    if (status !== 200) router.push("/");
+  }, [status]);
 
   const daysAgo = Math.floor(
-    (new Date().getTime() - video.createdAt.getTime()) / (24 * 60 * 60 * 1000),
+    (new Date().getTime() - new Date(video.createdAt).getTime()) /
+      (24 * 60 * 60 * 1000),
   );
 
   return (
@@ -74,7 +75,7 @@ const VideoPreview = ({ videoId }: Props) => {
         </div>
 
         <video
-        //   poster={`${process.env.NEXT_PUBLIC_CLOUD_FRONT_STREAM_URL}/${video.source}#t=0.1`}
+          //   poster={`${process.env.NEXT_PUBLIC_CLOUD_FRONT_STREAM_URL}/${video.source}#t=0.1`}
           preload="metadata"
           className={`w-full aspect-video rounded-xl transition-opacity duration-500 ${
             isPlaying ? "opacity-100" : "opacity-50"
