@@ -70,22 +70,7 @@ pipeline {
             }
         }
 
-        stage('Build Windows (.exe)') {
-            agent { label 'windows' }
-            steps {
-                withCredentials([file(credentialsId: 'webconnect-desktop-env', variable: 'SECURE_ENV')]) {
-                    dir('desktop') {
-                        bat "copy \"%SECURE_ENV%\" .env"
-                        bat 'npm ci'
-                        bat 'npm run build'
-                        bat 'npx electron-builder --win'
-                        stash includes: 'dist/*.exe', name: 'windows-build'
-                    }
-                }
-            }
-        }
-
-        stage('Build Linux (.AppImage)') {
+        stage('Build Linux (.AppImage) & Windows (.exe)') {
             agent {
                 docker {
                     image 'electronuserland/builder:wine'
@@ -98,8 +83,9 @@ pipeline {
                         sh "cp \$SECURE_ENV .env"
                         sh 'npm ci'
                         sh 'npm run build'
-                        sh 'npx electron-builder --linux'
+                        sh 'npx electron-builder --linux --win'
                         stash includes: 'dist/*.AppImage', name: 'linux-build'
+                        stash includes: 'dist/*.exe', name: 'windows-build'
                     }
                 }
             }
@@ -111,13 +97,13 @@ pipeline {
             }
             steps {
                 sh 'apt-get update && apt-get install -y gh ca-certificates'
-                unstash 'windows-build'
                 unstash 'linux-build'
+                unstash 'windows-build'
                 withEnv(["GITHUB_TOKEN=${env.GH_TOKEN}"]) {
                     sh """
                         gh release create v${env.APP_VERSION} \
-                            dist/WebConnect-Setup-${env.APP_VERSION}.exe \
                             dist/WebConnect-${env.APP_VERSION}.AppImage \
+                            dist/WebConnect-Setup-${env.APP_VERSION}.exe \
                             --title "Release v${env.APP_VERSION}" \
                             --notes "Bump type: ${env.BUMP_TYPE}" \
                             --repo BUSY-LOOPING/WebConnect
