@@ -15,8 +15,12 @@
   "build": {
     "appId": "com.busylooping.webconnect",
     "productName": "WebConnect",
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*"
+    ],
     "directories": {
-      "output": "dist"
+      "output": "release"
     },
     "win": {
       "target": "nsis",

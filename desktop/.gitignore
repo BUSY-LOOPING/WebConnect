@@ -1,3 +1,6 @@
+/release
+/dist
+
 # Logs
 logs
 *.log

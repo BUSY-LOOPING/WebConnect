@@ -84,8 +84,8 @@ pipeline {
                         sh 'npm ci'
                         sh 'npm run build'
                         sh 'npx electron-builder --linux --win'
-                        stash includes: 'dist/*.AppImage', name: 'linux-build'
-                        stash includes: 'dist/*.exe', name: 'windows-build'
+                        stash includes: 'release/*.AppImage', name: 'linux-build'
+                        stash includes: 'release/*.exe', name: 'windows-build'
                     }
                 }
             }
@@ -101,13 +101,13 @@ pipeline {
                 unstash 'windows-build'
                 withEnv(["GITHUB_TOKEN=${env.GH_TOKEN}"]) {
                     sh """
-                        gh release create v${env.APP_VERSION} \
-                            dist/WebConnect-${env.APP_VERSION}.AppImage \
-                            dist/WebConnect-Setup-${env.APP_VERSION}.exe \
-                            --title "Release v${env.APP_VERSION}" \
-                            --notes "Bump type: ${env.BUMP_TYPE}" \
-                            --repo BUSY-LOOPING/WebConnect
-                    """
+                gh release create v${env.APP_VERSION} \
+                    release/WebConnect-${env.APP_VERSION}.AppImage \
+                    release/WebConnect-Setup-${env.APP_VERSION}.exe \
+                    --title "Release v${env.APP_VERSION}" \
+                    --notes "Bump type: ${env.BUMP_TYPE}" \
+                    --repo BUSY-LOOPING/WebConnect
+            """
                 }
             }
         }

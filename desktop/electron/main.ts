@@ -18,11 +18,16 @@ process.env.APP_ROOT = path.join(__dirname, "..");
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 export const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 export const MAIN_DIST = path.join(process.env.APP_ROOT, "dist-electron");
-export const RENDERER_DIST = path.join(process.env.APP_ROOT, "dist");
+export const RENDERER_DIST = VITE_DEV_SERVER_URL
+  ? path.join(process.env.APP_ROOT, "dist")
+  : path.join(app.getAppPath(), "dist");
 
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
   ? path.join(process.env.APP_ROOT, "public")
   : RENDERER_DIST;
+
+console.log('RENDERER_DIST:', RENDERER_DIST);
+console.log('app.getAppPath():', app.getAppPath());
 
 let win: BrowserWindow | null;
 let studio: BrowserWindow | null;
@@ -113,7 +118,7 @@ function createWindow() {
 
   win.webContents.on("did-finish-load", () => {
     win?.webContents.send("main-process-message", new Date().toLocaleString());
-    win?.webContents.openDevTools({ mode: "detach" }); // opens as separate window
+    // win?.webContents.openDevTools({ mode: "detach" }); // opens as separate window
   });
 
   studio.webContents.on("did-finish-load", () => {
@@ -121,7 +126,7 @@ function createWindow() {
       "main-process-message",
       new Date().toLocaleString(),
     );
-        studio?.webContents.openDevTools({ mode: "detach" });
+        // studio?.webContents.openDevTools({ mode: "detach" });
   });
 
   if (VITE_DEV_SERVER_URL) {
