@@ -23,6 +23,7 @@ const StudioTray = () => {
         audio: string;
         preset: "HD" | "SD";
         plan: "PRO" | "FREE";
+        systemAudio: boolean
       }
     | undefined
   >(undefined);

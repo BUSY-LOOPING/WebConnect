@@ -1,92 +1,125 @@
-import { app as t, ipcMain as a, desktopCapturer as h, BrowserWindow as c } from "electron";
-import { fileURLToPath as u } from "node:url";
-import o from "node:path";
-const p = o.dirname(u(import.meta.url));
-process.env.APP_ROOT = o.join(p, "..");
-const i = process.env.VITE_DEV_SERVER_URL, g = o.join(process.env.APP_ROOT, "dist-electron"), l = i ? o.join(process.env.APP_ROOT, "dist") : o.join(t.getAppPath(), "dist");
-process.env.VITE_PUBLIC = i ? o.join(process.env.APP_ROOT, "public") : l;
-console.log("RENDERER_DIST:", l);
-console.log("app.getAppPath():", t.getAppPath());
-let n, e;
-function d() {
-  n = new c({
+import { app, ipcMain, desktopCapturer, BrowserWindow } from "electron";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+const __dirname$1 = path.dirname(fileURLToPath(import.meta.url));
+process.env.APP_ROOT = path.join(__dirname$1, "..");
+const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
+const MAIN_DIST = path.join(process.env.APP_ROOT, "dist-electron");
+const RENDERER_DIST = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, "dist") : path.join(app.getAppPath(), "dist");
+process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, "public") : RENDERER_DIST;
+let win;
+let studio;
+function createWindow() {
+  win = new BrowserWindow({
     // titleBarStyle: "hidden",
     maxWidth: 600,
     height: 400,
     minWidth: 300,
     // minWidth: 300,
     // minHeight: 600,
-    hasShadow: !1,
-    frame: !1,
-    transparent: !0,
-    alwaysOnTop: !0,
-    focusable: !0,
-    icon: o.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
+    hasShadow: false,
+    frame: false,
+    transparent: true,
+    alwaysOnTop: true,
+    focusable: true,
+    icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
     webPreferences: {
-      preload: o.join(p, "preload.mjs"),
-      nodeIntegration: !0,
-      contextIsolation: !0,
-      devTools: !0
+      preload: path.join(__dirname$1, "preload.mjs"),
+      nodeIntegration: true,
+      contextIsolation: true,
+      devTools: true
     }
-  }), e = new c({
+  });
+  studio = new BrowserWindow({
     width: 300,
     height: 200,
     minWidth: 200,
     maxWidth: 400,
     maxHeight: 500,
-    frame: !1,
-    hasShadow: !1,
-    transparent: !0,
-    alwaysOnTop: !0,
-    focusable: !0,
-    icon: o.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
+    frame: false,
+    hasShadow: false,
+    transparent: true,
+    alwaysOnTop: true,
+    focusable: true,
+    icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
     webPreferences: {
-      preload: o.join(p, "preload.mjs"),
-      nodeIntegration: !0,
-      contextIsolation: !0,
-      devTools: !0
+      preload: path.join(__dirname$1, "preload.mjs"),
+      nodeIntegration: true,
+      contextIsolation: true,
+      devTools: true
     }
-  }), n.setVisibleOnAllWorkspaces(!0, { visibleOnFullScreen: !0 }), n.setAlwaysOnTop(!0, "screen-saver", 1), e.setVisibleOnAllWorkspaces(!0, { visibleOnFullScreen: !0 }), e.setAlwaysOnTop(!0, "screen-saver", 1), n.webContents.on("did-finish-load", () => {
-    n == null || n.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString()), n == null || n.webContents.openDevTools({ mode: "detach" });
-  }), e.webContents.on("did-finish-load", () => {
-    e == null || e.webContents.send(
+  });
+  win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  win.setAlwaysOnTop(true, "screen-saver", 1);
+  studio.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  studio.setAlwaysOnTop(true, "screen-saver", 1);
+  win.webContents.on("did-finish-load", () => {
+    win == null ? void 0 : win.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
+    win == null ? void 0 : win.webContents.openDevTools({ mode: "detach" });
+  });
+  studio.webContents.on("did-finish-load", () => {
+    studio == null ? void 0 : studio.webContents.send(
       "main-process-message",
       (/* @__PURE__ */ new Date()).toLocaleString()
-    ), e == null || e.webContents.openDevTools({ mode: "detach" });
-  }), i ? (n.loadURL(i), e.loadURL(`${i}/studio.html`)) : (n.loadFile(o.join(l, "index.html")), e.loadFile(o.join(l, "studio.html")));
+    );
+    studio == null ? void 0 : studio.webContents.openDevTools({ mode: "detach" });
+  });
+  if (VITE_DEV_SERVER_URL) {
+    win.loadURL(VITE_DEV_SERVER_URL);
+    studio.loadURL(`${VITE_DEV_SERVER_URL}/studio.html`);
+  } else {
+    win.loadFile(path.join(RENDERER_DIST, "index.html"));
+    studio.loadFile(path.join(RENDERER_DIST, "studio.html"));
+  }
 }
-t.on("window-all-closed", () => {
-  process.platform !== "darwin" && (t.quit(), n = null);
-});
-a.on("closeApp", () => {
-  process.platform !== "darwin" && (t.quit(), n = null, e = null);
-});
-a.handle("getSources", async () => {
-  try {
-    return await h.getSources({
-      thumbnailSize: { height: 100, width: 150 },
-      fetchWindowIcons: !0,
-      types: ["window", "screen"]
-    });
-  } catch (s) {
-    throw console.error("Error getting sources:", s), s;
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
+    win = null;
   }
 });
-a.on("media-sources", (s, r) => {
-  e == null || e.webContents.send("profile-received", r);
+ipcMain.on("closeApp", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
+    win = null;
+    studio = null;
+  }
 });
-a.on("resize-studio", (s, r) => {
-  r.shrink && (e == null || e.setSize(400, 100)), r.shrink || e == null || e.setSize(400, 250);
+ipcMain.handle("getSources", async () => {
+  try {
+    const data = await desktopCapturer.getSources({
+      thumbnailSize: { height: 100, width: 150 },
+      fetchWindowIcons: true,
+      types: ["window", "screen"]
+    });
+    return data;
+  } catch (error) {
+    console.error("Error getting sources:", error);
+    throw error;
+  }
 });
-a.on("hide-plugin", (s, r) => {
-  n == null || n.webContents.send("hide-plugin", r);
+ipcMain.on("media-sources", (_, payload) => {
+  studio == null ? void 0 : studio.webContents.send("profile-received", payload);
 });
-t.on("activate", () => {
-  c.getAllWindows().length === 0 && d();
+ipcMain.on("resize-studio", (_, payload) => {
+  if (payload.shrink) {
+    studio == null ? void 0 : studio.setSize(400, 100);
+  }
+  if (!payload.shrink) {
+    studio == null ? void 0 : studio.setSize(400, 250);
+  }
 });
-t.whenReady().then(d);
+ipcMain.on("hide-plugin", (_, payload) => {
+  win == null ? void 0 : win.webContents.send("hide-plugin", payload);
+});
+app.on("activate", () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
+});
+app.whenReady().then(createWindow);
 export {
-  g as MAIN_DIST,
-  l as RENDERER_DIST,
-  i as VITE_DEV_SERVER_URL
+  MAIN_DIST,
+  RENDERER_DIST,
+  VITE_DEV_SERVER_URL
 };

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 export const useStudioSettings = (
   id: string,
+  systemAudio: boolean,
   screen?: string | null,
   audio?: string | null,
   preset?: "HD" | "SD",
@@ -28,6 +29,7 @@ export const useStudioSettings = (
       id: string;
       audio: string;
       preset: "HD" | "SD";
+    //   systemAudio: boolean;
     }) => updateStudioSettings(data.id, data.screen, data.audio, data.preset),
     onSuccess: (data) => {
       return toast(data.status === 200 ? "Success" : "Error", {
@@ -44,12 +46,12 @@ export const useStudioSettings = (
         audio,
         preset,
         plan,
+        systemAudio: systemAudio
       });
     }
   }, [screen, audio, preset, id, plan]);
 
   useEffect(() => {
-    console.log("watch changed");
     const subscribe = watch((values) => {
       if (!values.screen || !values.audio || !values.preset) return;
       setPreset(values.preset);
@@ -58,6 +60,7 @@ export const useStudioSettings = (
         id,
         audio: values.audio!,
         preset: values.preset!,
+        
       });
       window.ipcRenderer.send("media-sources", {
         screen: values.screen,
@@ -65,6 +68,7 @@ export const useStudioSettings = (
         audio: values.audio,
         preset: values.preset,
         plan,
+        systemAudio: systemAudio
       });
     });
 

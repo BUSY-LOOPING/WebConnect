@@ -1,4 +1,10 @@
-import { app, BrowserWindow, ipcMain, desktopCapturer } from "electron";
+import {
+  app,
+  BrowserWindow,
+  ipcMain,
+  desktopCapturer,
+  session,
+} from "electron";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
@@ -26,14 +32,12 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
   ? path.join(process.env.APP_ROOT, "public")
   : RENDERER_DIST;
 
-console.log('RENDERER_DIST:', RENDERER_DIST);
-console.log('app.getAppPath():', app.getAppPath());
-
 let win: BrowserWindow | null;
 let studio: BrowserWindow | null;
 // let floatingWebCam: BrowserWindow | null;
 
 function createWindow() {
+
   win = new BrowserWindow({
     // titleBarStyle: "hidden",
     maxWidth: 600,
@@ -118,7 +122,7 @@ function createWindow() {
 
   win.webContents.on("did-finish-load", () => {
     win?.webContents.send("main-process-message", new Date().toLocaleString());
-    // win?.webContents.openDevTools({ mode: "detach" }); // opens as separate window
+    win?.webContents.openDevTools({ mode: "detach" }); // opens as separate window
   });
 
   studio.webContents.on("did-finish-load", () => {
@@ -126,8 +130,20 @@ function createWindow() {
       "main-process-message",
       new Date().toLocaleString(),
     );
-        // studio?.webContents.openDevTools({ mode: "detach" });
+    studio?.webContents.openDevTools({ mode: "detach" });
   });
+
+  //   win.webContents.on("will-navigate", (event, url) => {
+  //     if (!url.startsWith("file://") && !url.startsWith("http://localhost")) {
+  //       event.preventDefault();
+  //       shell.openExternal(url);
+  //     }
+  //   });
+
+  //   win.webContents.setWindowOpenHandler(({ url }) => {
+  //     shell.openExternal(url);
+  //     return { action: "deny" };
+  //   });
 
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);

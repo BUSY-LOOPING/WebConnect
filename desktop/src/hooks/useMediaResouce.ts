@@ -15,14 +15,14 @@ export type SourceDeviceStateProps = {
     label: string;
     groupId: string;
   }[];
+  systemAudio: boolean;
   error?: string | null;
   isPending?: boolean;
 };
 
-type DisplayDeviceActionProps = {
-  type: "GET_DEVICES";
-  payload: SourceDeviceStateProps;
-};
+type DisplayDeviceActionProps =
+  | { type: "GET_DEVICES"; payload: Omit<SourceDeviceStateProps, "systemAudio"> }
+  | { type: "TOGGLE_SYSTEM_AUDIO" };
 
 export const useMediaResource = () => {
   const [state, action] = useReducer(
@@ -30,6 +30,8 @@ export const useMediaResource = () => {
       switch (action.type) {
         case "GET_DEVICES":
           return { ...state, ...action.payload };
+        case "TOGGLE_SYSTEM_AUDIO":
+          return { ...state, systemAudio: !state.systemAudio };
         default:
           return state;
       }
@@ -37,6 +39,7 @@ export const useMediaResource = () => {
     {
       displays: [],
       audioInputs: [],
+      systemAudio: false,
       error: null,
       isPending: false,
     },
@@ -58,13 +61,12 @@ export const useMediaResource = () => {
       .catch((error) => {
         action({
           type: "GET_DEVICES",
-          payload: {
-            error: error.message,
-            isPending: false,
-          },
+          payload: { error: error.message, isPending: false },
         });
       });
   };
 
-  return { state, fetchMediaResources };
+  const toggleSystemAudio = () => action({ type: "TOGGLE_SYSTEM_AUDIO" });
+
+  return { state, fetchMediaResources, toggleSystemAudio };
 };

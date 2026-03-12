@@ -1,5 +1,5 @@
 import { ClerkLoading, SignedIn, useUser } from "@clerk/clerk-react";
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader } from "../Loader";
 import { fetchUserProfile } from "@/lib/utils";
 import { useMediaResource } from "@/hooks/useMediaResouce";
@@ -32,15 +32,16 @@ const Widget = () => {
       | null;
   } | null>(null);
   const { user } = useUser();
-  const { state, fetchMediaResources } = useMediaResource();
-  //console.log(state);
+  const { state, fetchMediaResources, toggleSystemAudio } = useMediaResource();
 
   useEffect(() => {
     if (user && user.id) {
-      fetchUserProfile(user.id).then((p) => setProfile(p));
+      fetchUserProfile(user.id).then((p) => {
+        setProfile(p);
+      });
     }
   }, [user]);
-   
+
   useEffect(() => {
     fetchMediaResources();
   }, []);
@@ -54,7 +55,7 @@ const Widget = () => {
       </ClerkLoading>
       <SignedIn>
         {profile ? (
-          <MediaConfiguration state={state} user={profile.user} />
+          <MediaConfiguration state={state} user={profile.user} onToggleSystemAudio={toggleSystemAudio}/>
         ) : (
           <div className="h-full w-full justify-center items-center">
             <Loader color="#fff" />
