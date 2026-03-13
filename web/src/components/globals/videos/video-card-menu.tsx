@@ -25,7 +25,7 @@ const CardMenu = ({
       <Move 
         size={20} 
         fill="#4f4f4f" 
-        className="text-[#4f4f4f]" 
+        className="text-[#8b8b8b] hover:text-white" 
       />}
     >
       <ChangeVideoLocation

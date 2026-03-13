@@ -8,44 +8,28 @@ export async function POST(
   try {
     const { id } = await params;
     const body = await req.json();
-    const personalworkspaceId = await client.user.findUnique({
-      where: {
-        id,
-      },
-      select: {
-        workspace: {
-          where: {
-            type: "PERSONAL",
-          },
-          select: {
-            id: true,
-          },
-          orderBy: {
-            createdAt: "asc",
-          },
-        },
-      },
-    });
+
+    const targetWorkspaceId = body.workspaceId || await getPersonalWorkspaceId(id);
+    if (!targetWorkspaceId) return NextResponse.json({ status: 400 });
+
+    const videoData: any = {
+      source: body.filename,
+      userId: id,
+    };
+
+    if (body.folderId) {
+      videoData.folderId = body.folderId;
+    }
+
     const startProcessingVideo = await client.workSpace.update({
-      where: {
-        id: personalworkspaceId?.workspace[0].id,
-      },
+      where: { id: targetWorkspaceId },
       data: {
-        videos: {
-          create: {
-            source: body.filename,
-            userId: id,
-          },
-        },
+        videos: { create: videoData },
       },
       select: {
         User: {
           select: {
-            subscription: {
-              select: {
-                plan: true,
-              },
-            },
+            subscription: { select: { plan: true } },
           },
         },
       },
@@ -60,5 +44,20 @@ export async function POST(
     return NextResponse.json({ status: 400 });
   } catch (error) {
     console.log("Error", error);
+    return NextResponse.json({ status: 500 });
   }
 }
+
+const getPersonalWorkspaceId = async (userId: string) => {
+  const user = await client.user.findUnique({
+    where: { id: userId },
+    select: {
+      workspace: {
+        where: { type: "PERSONAL" },
+        select: { id: true },
+        orderBy: { createdAt: "asc" },
+      },
+    },
+  });
+  return user?.workspace[0]?.id ?? null;
+};

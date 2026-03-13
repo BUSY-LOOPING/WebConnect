@@ -4,6 +4,8 @@ import {
   ipcMain,
   desktopCapturer,
   session,
+  protocol,
+  net, shell
 } from "electron";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -37,7 +39,6 @@ let studio: BrowserWindow | null;
 // let floatingWebCam: BrowserWindow | null;
 
 function createWindow() {
-
   win = new BrowserWindow({
     // titleBarStyle: "hidden",
     maxWidth: 600,
@@ -104,22 +105,6 @@ function createWindow() {
   studio.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   studio.setAlwaysOnTop(true, "screen-saver", 1);
 
-  //   win.setIgnoreMouseEvents(true, { forward: true });
-  //   studio.setIgnoreMouseEvents(true, { forward: true });
-  //   floatingWebCam.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
-  //   floatingWebCam.setAlwaysOnTop(true, "screen-saver", 1);
-
-  // Test active push message to Renderer-process.
-  //   win.webContents.setWindowOpenHandler(({ url }) => {
-  //     if (url.includes('accounts.google.com') ||
-  //         url.includes('oauth') ||
-  //         url.includes('clerk')) {
-  //       require('electron').shell.openExternal(url)
-  //       return { action: 'deny' }
-  //     }
-  //     return { action: 'allow' }
-  //   })
-
   win.webContents.on("did-finish-load", () => {
     win?.webContents.send("main-process-message", new Date().toLocaleString());
     win?.webContents.openDevTools({ mode: "detach" }); // opens as separate window
@@ -133,27 +118,37 @@ function createWindow() {
     studio?.webContents.openDevTools({ mode: "detach" });
   });
 
-  //   win.webContents.on("will-navigate", (event, url) => {
-  //     if (!url.startsWith("file://") && !url.startsWith("http://localhost")) {
-  //       event.preventDefault();
-  //       shell.openExternal(url);
-  //     }
-  //   });
+//   win.webContents.on("will-navigate", (event, url) => {
+//     if (url.startsWith("https://webconnect.dhruvyadav.ca")) {
+//       event.preventDefault();
 
-  //   win.webContents.setWindowOpenHandler(({ url }) => {
-  //     shell.openExternal(url);
-  //     return { action: "deny" };
-  //   });
+//       // Extract Clerk's session params from the redirect URL
+//       const parsed = new URL(url);
+//       const clerkParams = parsed.searchParams.toString(); // __clerk_db_jwt, __clerk_status etc
+
+//       console.log("clerk params", clerkParams);
+//       if (VITE_DEV_SERVER_URL) {
+//         const target = clerkParams
+//           ? `${VITE_DEV_SERVER_URL}?${clerkParams}`
+//           : VITE_DEV_SERVER_URL;
+//         win?.loadURL(target);
+//       } else {
+//         const target = clerkParams
+//           ? path.join(RENDERER_DIST, `index.html?${clerkParams}`)
+//           : path.join(RENDERER_DIST, `index.html`);
+//         win?.loadURL(target);
+//       }
+//     }
+//   });
 
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
     studio.loadURL(`${VITE_DEV_SERVER_URL}/studio.html`);
-    // floatingWebCam.loadURL(`${import.meta.env.VITE_APP_URL}/webcam.html`);
   } else {
-    // win.loadFile('dist/index.html')
-    win.loadFile(path.join(RENDERER_DIST, "index.html"));
-    studio.loadFile(path.join(RENDERER_DIST, "studio.html"));
-    // floatingWebCam.loadFile(path.join(RENDERER_DIST, "webcam.html"));
+    // win.loadFile(path.join(RENDERER_DIST, "index.html"));
+    // studio.loadFile(path.join(RENDERER_DIST, "studio.html"));
+    win.loadURL("webconnect://app/index.html");
+    studio.loadURL("webconnect://app/studio.html");
   }
 }
 
@@ -225,5 +220,30 @@ app.on("activate", () => {
     createWindow();
   }
 });
+// protocol.registerSchemesAsPrivileged([
+//   {
+//     scheme: "webconnect",
+//     privileges: {
+//       standard: true,
+//       secure: true,
+//       supportFetchAPI: true,
+//       allowServiceWorkers: true,
+//       corsEnabled: true,
+//     },
+//   },
+// ]);
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+//   protocol.handle("webconnect", (request) => {
+//     const url = request.url.replace("webconnect://app/", "");
+//     const filePath = path.join(
+//       __dirname,
+//       "..",
+//       "dist",
+//       decodeURIComponent(url) || "index.html"
+//     );
+//     return net.fetch(`file://${filePath}`);
+//   });
+
+  createWindow();
+});

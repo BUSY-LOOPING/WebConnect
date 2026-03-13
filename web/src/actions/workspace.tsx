@@ -9,40 +9,29 @@ import { sendEmail } from "./user";
 export const verifyAccessToWorkspace = async (workspaceId: string) => {
   try {
     const user = await currentUser();
-    if (!user) {
-      return { status: 403 };
-    }
+    if (!user) return { status: 403 };
 
-    const isUserInWorkspace = await client.workSpace.findUnique({
-      where: {
-        id: workspaceId,
-        OR: [
-          {
-            User: {
-              clerkid: user.id,
-            },
-          },
-          {
-            members: {
-              every: {
-                User: {
-                  clerkid: user.id,
-                },
-              },
-            },
-          },
-        ],
-      },
+    const dbUser = await client.user.findUnique({
+      where: { clerkid: user.id },
+      select: { id: true },
     });
-    return {
-      status: 200,
-      data: { workspace: isUserInWorkspace },
-    };
+    if (!dbUser) return { status: 404 };
+
+    const workspace = await client.workSpace.findUnique({
+      where: { id: workspaceId },
+      include: { members: true },
+    });
+    if (!workspace) return { status: 404, data: { workspace: null } };
+
+    const isOwner = workspace.userId === dbUser.id;
+    const isMember = workspace.members.some((m) => m.userId === dbUser.id);
+
+    if (!isOwner && !isMember) return { status: 401, data: { workspace: null } };
+
+    // ✅ workspace is always returned here
+    return { status: 200, data: { workspace } };
   } catch (error) {
-    return {
-      status: 403,
-      data: { workspace: null },
-    };
+    return { status: 400, data: { workspace: null } };
   }
 };
 
@@ -78,7 +67,10 @@ export const getAllUserVideos = async (workSpaceId: string) => {
     }
     const videos = await client.video.findMany({
       where: {
-        OR: [{ workSpaceId }, { folderId: workSpaceId }],
+        OR: [
+          { workSpaceId },
+          { folderId: workSpaceId },
+        ],
       },
       select: {
         id: true,
@@ -101,7 +93,7 @@ export const getAllUserVideos = async (workSpaceId: string) => {
         },
       },
       orderBy: {
-        createdAt: "asc",
+        createdAt: "desc",
       },
     });
     if (videos) {

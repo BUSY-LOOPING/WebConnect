@@ -44,6 +44,11 @@ export const onAuthenticateUser = async () => {
       },
       include: {
         workspace: true,
+        members: {
+          include: {
+            WorkSpace: true,
+          },
+        },
       },
     });
     if (userExist) {
@@ -391,7 +396,6 @@ export const inviteMembers = async (
         });
 
         if (invitation) {
-          
           const emailHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>

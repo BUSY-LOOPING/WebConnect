@@ -95,6 +95,7 @@ const VideoPreview = ({ videoId }: Props) => {
           onPause={() => setIsPlaying(false)}
         >
           <source
+          type={video.source.endsWith(".mp4") ? "video/mp4" : "video/webm"}
             src={`/api/video/${video.source}`}
           />
         </video>
@@ -145,7 +146,7 @@ const VideoPreview = ({ videoId }: Props) => {
               trial={video.User?.trial!}
               plan={video.User?.subscription?.plan!}
             />
-            <VideoTranscript description={video.summary!} />
+            <VideoTranscript description={video.summary!}  processing={video.processing} isPro={video.User?.trial || video.User?.subscription?.plan === 'PRO'}/>
             <Activities
               author={video.User?.firstname as string}
               videoId={videoId}

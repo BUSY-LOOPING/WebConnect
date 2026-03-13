@@ -110,10 +110,16 @@ io.on('connection', (socket) => {
         try {
             const processing = await axios.post(
                 `${process.env.NEXT_API_HOST}recording/${data.userId}/processing`,
-                { filename: mp4Filename } 
+                {
+                    filename: mp4Filename,
+                    workspaceId: data.workspaceId || null,
+                    folderId: data.folderId || null,
+                }
             )
-            if (processing.data.status !== 200) return
-
+            if (processing.data.status !== 200) {
+                console.error('❌ Processing API returned non-200:', processing.data)
+                return
+            }
             // Convert to MP4 regardless of input format
             // -c:v copy tries to stream-copy if already H264 (fast, no re-encode)
             // If that fails (VP9 input), falls back to re-encoding
@@ -153,7 +159,7 @@ io.on('connection', (socket) => {
             // PRO: extract audio from the already-converted mp4 (faster than from webm)
             if (processing.data.plan === 'PRO') {
                 await handleProProcessing(
-                    { ...data, filename: mp4Filename }, 
+                    { ...data, filename: mp4Filename },
                     mp4Path
                 )
             } else {
@@ -209,13 +215,34 @@ const handleProProcessing = async (data, videoPath) => {
 
         console.log('📝 Transcription complete, length:', transcript.length)
 
-        if (transcript) {
+        if (transcript && transcript.length > 0) {
             const completion = await openai.chat.completions.create({
                 model: 'qwen2.5-coder:14b',
                 response_format: { type: 'json_object' },
                 messages: [{
                     role: 'system',
-                    content: `You are going to generate a title and nice description using the speech to text transcription provided: transcription(${transcript}) and then return it in json format as {"title": <the title you gave>, "summary": <the summary you gave>}`
+                    content: `You are an expert meeting analyst and content summarizer. You will receive a speech-to-text transcription of a recorded video or meeting session which may involve one or more speakers.
+
+Analyze the transcription carefully and produce:
+1. A concise, descriptive TITLE that captures the core topic or purpose (max 10 words)
+2. A structured SUMMARY that includes:
+   - Main topic or purpose of the recording
+   - Key points discussed or decisions made
+   - Action items or next steps (if any)
+   - Notable participants or roles (if identifiable from context)
+
+Transcription:
+${transcript}
+
+Rules:
+- If multiple speakers are present, reflect that in the summary
+- Be specific, not generic — avoid filler phrases like "the speaker discusses..."
+- The title should be professional and searchable
+- Summary should be 3-5 sentences maximum
+- Return ONLY valid JSON, no markdown, no backticks, no preamble
+
+Return format:
+{"title": "<your title>", "summary": "<your summary>"}`
                 }]
             })
 
@@ -229,7 +256,6 @@ const handleProProcessing = async (data, videoPath) => {
         }
 
     } finally {
-        // ✅ Always clean up temp files even if processing fails
         await fs.promises.unlink(audioPath).catch(() => { })
         await completeAndCleanup(data, videoPath)
     }
@@ -238,15 +264,20 @@ const handleProProcessing = async (data, videoPath) => {
 const handleFreeProcessing = async (data, videoPath) => {
     await completeAndCleanup(data, videoPath)
 }
-
+ 
 const completeAndCleanup = async (data, videoPath) => {
-    const stopProcessing = await axios.post(
-        `${process.env.NEXT_API_HOST}recording/${data.userId}/complete`,
-        { filename: data.filename }
-    )
-    if (stopProcessing.status === 200) {
-        await fs.promises.unlink(videoPath).catch(() => { })
-        console.log('✅ Cleanup complete for', data.filename)
+    try {
+        const stopProcessing = await axios.post(
+            `${process.env.NEXT_API_HOST}recording/${data.userId}/complete`,
+            { filename: data.filename }
+        )
+        if (stopProcessing.status === 200) {
+            console.log('Cleanup complete for', data.filename)
+        }
+    } catch (err) {
+        console.error('completeAndCleanup failed:', err?.response?.data || err?.message)
+    } finally {
+        await fs.promises.unlink(videoPath).catch(() => {})
     }
 }
 

@@ -111,102 +111,111 @@ export const selectSources = async (
   },
   videoElement: React.RefObject<HTMLVideoElement>,
 ) => {
-    // onSources.systemAudio = true;
-    console.log('system audio' , onSources.systemAudio)
-  if (onSources && onSources.screen && onSources.audio && onSources.id) {
-    cleanupStreams();
-    chunkQueue = [];
+  console.log("system audio", onSources.systemAudio);
 
-    if (videoElement?.current) {
-      videoElement.current.srcObject = null;
-    }
+  if (!onSources?.screen || !onSources?.audio || !onSources?.id) return;
 
-    userId = onSources.id;
+  cleanupStreams();
+  chunkQueue = [];
+  userId = onSources.id;
 
-    const videoStream = await navigator.mediaDevices.getUserMedia({
-      audio: false,
-      video: {
-        mandatory: {
-          chromeMediaSource: "desktop",
-          chromeMediaSourceId: onSources.screen,
-          minWidth: onSources.preset === "HD" ? 1920 : 1280,
-          maxWidth: onSources.preset === "HD" ? 1920 : 1280,
-          minHeight: onSources.preset === "HD" ? 1080 : 720,
-          maxHeight: onSources.preset === "HD" ? 1080 : 720,
-          frameRate: 30,
-        },
-      } as any,
-    });
-    activeStreams.push(videoStream);
+  if (videoElement?.current) {
+    videoElement.current.srcObject = null;
+  }
 
-    const micStream = await navigator.mediaDevices.getUserMedia({
-      video: false,
-      audio: onSources.audio ? { deviceId: { exact: onSources.audio } } : false,
-    });
-    activeStreams.push(micStream);
+  // ── 1. Video (always via getUserMedia with chromeMediaSource) ──────────────
+  const videoStream = await navigator.mediaDevices.getUserMedia({
+    audio: false,
+    video: {
+      mandatory: {
+        chromeMediaSource: "desktop",
+        chromeMediaSourceId: onSources.screen,
+        minWidth: onSources.preset === "HD" ? 1920 : 1280,
+        maxWidth: onSources.preset === "HD" ? 1920 : 1280,
+        minHeight: onSources.preset === "HD" ? 1080 : 720,
+        maxHeight: onSources.preset === "HD" ? 1080 : 720,
+        frameRate: 30,
+      },
+    } as any,
+  });
+  activeStreams.push(videoStream);
 
-    const audioTracks = [...micStream.getAudioTracks()];
+  // ── 2. Mic ─────────────────────────────────────────────────────────────────
+  const micStream = await navigator.mediaDevices.getUserMedia({
+    video: false,
+    audio: { deviceId: { exact: onSources.audio } },
+  });
+  activeStreams.push(micStream);
 
-    if (true) {
-      try {
-        const systemStream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            mandatory: {
-              chromeMediaSource: "desktop",
-              chromeMediaSourceId: onSources.screen,
-            },
-          } as any,
-          video: false,
-        });
-        activeStreams.push(systemStream);
+  // ── 3. System audio (optional) ─────────────────────────────────────────────
+  let finalAudioTracks = [...micStream.getAudioTracks()];
 
+  if (onSources.systemAudio) {
+    try {
+      // getDisplayMedia routes through setDisplayMediaRequestHandler
+      // which returns audio: "loopback" for WASAPI system audio on Windows
+      const displayStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true, // must request video, even if we discard it
+        audio: true,
+      });
+
+      // Discard the video track — we already have video from getUserMedia above
+      displayStream.getVideoTracks().forEach((t) => t.stop());
+      activeStreams.push(displayStream);
+
+      const systemAudioTracks = displayStream.getAudioTracks();
+
+      if (systemAudioTracks.length > 0) {
         const ctx = new AudioContext();
         const destination = ctx.createMediaStreamDestination();
-
-        const micSource = ctx.createMediaStreamSource(
-          new MediaStream(micStream.getAudioTracks()),
-        );
-        const systemSource = ctx.createMediaStreamSource(
-          new MediaStream(systemStream.getAudioTracks()),
-        );
 
         const micGain = ctx.createGain();
         const systemGain = ctx.createGain();
         micGain.gain.value = 1.0;
         systemGain.gain.value = 1.0;
 
-        micSource.connect(micGain).connect(destination);
-        systemSource.connect(systemGain).connect(destination);
+        ctx
+          .createMediaStreamSource(new MediaStream(micStream.getAudioTracks()))
+          .connect(micGain)
+          .connect(destination);
 
-        audioTracks.length = 0;
-        audioTracks.push(...destination.stream.getAudioTracks());
-      } catch (err) {
-        console.warn("⚠️ System audio capture failed, falling back to mic only:", err);
+        ctx
+          .createMediaStreamSource(new MediaStream(systemAudioTracks))
+          .connect(systemGain)
+          .connect(destination);
+
+        finalAudioTracks = destination.stream.getAudioTracks();
+        console.log("✅ System audio mixed successfully");
+      } else {
+        console.warn("⚠️ No system audio tracks returned, using mic only");
       }
+    } catch (err) {
+      console.warn("⚠️ System audio capture failed, using mic only:", err);
     }
-
-    if (videoElement?.current) {
-      videoElement.current.srcObject = videoStream;
-      await videoElement.current.play();
-    }
-
-    const combinedStream = new MediaStream([
-      ...videoStream.getVideoTracks(),
-      ...audioTracks,
-    ]);
-
-    const mimeType = MediaRecorder.isTypeSupported("video/webm; codecs=vp9")
-      ? "video/webm; codecs=vp9"
-      : "video/webm";
-
-    videoTransferFileName = `${uuid()}-${onSources.id.slice(0, 8)}.webm`;
-
-    mediaRecorder = new MediaRecorder(combinedStream, { mimeType });
-    mediaRecorder.ondataavailable = onDataAvailable;
-    mediaRecorder.onstop = stopRecording;
   }
-};
 
+  // ── 4. Preview ─────────────────────────────────────────────────────────────
+  if (videoElement?.current) {
+    videoElement.current.srcObject = videoStream;
+    await videoElement.current.play();
+  }
+
+  // ── 5. Combine & create recorder ───────────────────────────────────────────
+  const combinedStream = new MediaStream([
+    ...videoStream.getVideoTracks(),
+    ...finalAudioTracks,
+  ]);
+
+  const mimeType = MediaRecorder.isTypeSupported("video/webm; codecs=vp9")
+    ? "video/webm; codecs=vp9"
+    : "video/webm";
+
+  videoTransferFileName = `${uuid()}-${onSources.id.slice(0, 8)}.webm`;
+
+  mediaRecorder = new MediaRecorder(combinedStream, { mimeType });
+  mediaRecorder.ondataavailable = onDataAvailable;
+  mediaRecorder.onstop = stopRecording;
+};
 export const destroyRecorder = () => {
   cleanupStreams();
   chunkQueue = [];

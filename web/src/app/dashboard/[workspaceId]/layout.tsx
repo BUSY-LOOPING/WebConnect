@@ -30,6 +30,7 @@ const Layout = async ({ params, children }: Props) => {
   const hasAccess = await verifyAccessToWorkspace(workspaceId);
   if (hasAccess.status !== 200) {
     redirect(`dashboard/${auth.user?.workspace[0].id}`);
+  } else {
   }
 
   if (!hasAccess.data?.workspace) return null;
@@ -51,6 +52,8 @@ const Layout = async ({ params, children }: Props) => {
     queryKey: ["user-notifications"],
     queryFn: () => getNotifications(),
   });
+
+  
 
   return (
     <HydrationBoundary state={dehydrate(query)}>

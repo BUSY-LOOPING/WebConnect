@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { useQueryData } from "@/hooks/useQueryData";
 import Image from "next/image";
@@ -68,17 +69,17 @@ const Sidebar = ({ activeWorkspaceId }: Props) => {
   }, [isFetched, workspace, dispatch]);
 
   const SidebarSection = (
-    <div className="bg-[#111111] flex-none relative p-4 h-screen w-[250px] flex flex-col gap-4 items-center overflow-y-auto">
-      <div className="bg-[#111111] gap-2 py-4 justify-center flex items-center mb-4 w-full z-20 sticky top-0">
-        <Image src="/main-logo.svg" height={40} width={40} alt="logo" />
-        <p className="text-2xl">WebConnect</p>
-      </div>
-      <Select
-        defaultValue={activeWorkspaceId}
-        onValueChange={onChangeActiveWorkspace}
-      >
+  <div className="bg-[#111111] flex-none relative h-screen w-[250px] flex flex-col">
+    
+    <Link  href="/dashboard" className="bg-[#111111] gap-2 py-4 px-4 justify-center flex items-center w-full z-20 shrink-0 pt-6">
+      <Image src="/main-logo.svg" height={40} width={40} alt="logo" />
+      <p className="text-2xl">WebConnect</p>
+    </Link>
+
+    <div className="mt-10 flex flex-col gap-4 items-center px-4 pb-4 overflow-y-auto flex-1">
+      <Select defaultValue={activeWorkspaceId} onValueChange={onChangeActiveWorkspace}>
         <SelectTrigger className="w-full text-neutral-400 bg-transparent">
-          <SelectValue placeholder="Select a workspace"></SelectValue>
+          <SelectValue placeholder="Select a workspace" />
         </SelectTrigger>
         <SelectContent className="bg-[#111111] backdrop-blur-xl">
           <SelectGroup>
@@ -93,10 +94,7 @@ const Sidebar = ({ activeWorkspaceId }: Props) => {
               workspace.members.map(
                 (workspace) =>
                   workspace.WorkSpace && (
-                    <SelectItem
-                      value={workspace.WorkSpace.id}
-                      key={workspace.WorkSpace.id}
-                    >
+                    <SelectItem value={workspace.WorkSpace.id} key={workspace.WorkSpace.id}>
                       {workspace.WorkSpace.name}
                     </SelectItem>
                   ),
@@ -104,26 +102,22 @@ const Sidebar = ({ activeWorkspaceId }: Props) => {
           </SelectGroup>
         </SelectContent>
       </Select>
-      {currentWorkspace?.type === "PUBLIC" &&
-        workspace.subscription?.plan === "PRO" && (
-          <Modal
-            title="Invite To Workspace"
-            description="Invite other users to your workspace"
-            trigger={
-              <span className="text-sm cursor-pointer flex items-center justify-center bg-neutral-800/90 hover:bg-neutral-800/60 w-full rounded-sm p-[5px] gap-2">
-                <PlusCircle
-                  size={15}
-                  className="text-neutral-800/90 fill-neutral-500"
-                />
-                <span className="text-neutral-400 font-semibold text-xs">
-                  Invite to Workspace
-                </span>
-              </span>
-            }
-          >
-            <Search workspaceId={activeWorkspaceId} />
-          </Modal>
-        )}
+
+      {currentWorkspace?.type === "PUBLIC" && workspace.subscription?.plan === "PRO" && (
+        <Modal
+          title="Invite To Workspace"
+          description="Invite other users to your workspace"
+          trigger={
+            <span className="text-sm cursor-pointer flex items-center justify-center bg-neutral-800/90 hover:bg-neutral-800/60 w-full rounded-sm p-[5px] gap-2">
+              <PlusCircle size={15} className="text-neutral-800/90 fill-neutral-500" />
+              <span className="text-neutral-400 font-semibold text-xs">Invite to Workspace</span>
+            </span>
+          }
+        >
+          <Search workspaceId={activeWorkspaceId} />
+        </Modal>
+      )}
+
       <p className="w-full text-[#9d9d9d] font-bold mt-4">Menu</p>
       <nav className="w-full">
         <ul>
@@ -135,28 +129,26 @@ const Sidebar = ({ activeWorkspaceId }: Props) => {
               selected={pathName === item.href}
               key={item.title}
               notifications={
-                (item.title === "Notifications" &&
-                  count._count &&
-                  count._count.notification) ||
-                0
+                (item.title === "Notifications" && count._count && count._count.notification) || 0
               }
             />
           ))}
         </ul>
       </nav>
+
       <Separator className="w-4/5" />
-      <p className="w-full text-[#9d9d9d] font-bold mt-4]">Workspaces</p>
+      <p className="w-full text-[#9d9d9d] font-bold">Workspaces</p>
+
       {workspace.workspace.length === 1 && workspace.members.length === 0 && (
         <div className="w-full mt-[-10px]">
           <p className="text-[#3c3c3c] font-medium text-sm">
-            {workspace.subscription?.plan === "FREE"
-              ? "Upgrade to create workspaces"
-              : "No Workspaces"}
+            {workspace.subscription?.plan === "FREE" ? "Upgrade to create workspaces" : "No Workspaces"}
           </p>
         </div>
       )}
+
       <nav className="w-full">
-        <ul className="h-[150px] overflow-auto overflow-x-hidden fade-layer">
+        <ul className="overflow-auto overflow-x-hidden fade-layer">
           {workspace.workspace.length > 0 &&
             workspace.workspace.map(
               (item) =>
@@ -167,11 +159,7 @@ const Sidebar = ({ activeWorkspaceId }: Props) => {
                     title={item.name}
                     notifications={0}
                     key={item.name}
-                    icon={
-                      <WorkspacePlaceholder>
-                        {item.name.charAt(0)}
-                      </WorkspacePlaceholder>
-                    }
+                    icon={<WorkspacePlaceholder>{item.name.charAt(0)}</WorkspacePlaceholder>}
                   />
                 ),
             )}
@@ -179,15 +167,11 @@ const Sidebar = ({ activeWorkspaceId }: Props) => {
             workspace.members.map((item) => (
               <SidebarItem
                 href={`/dashboard/${item.WorkSpace.id}`}
-                selected={pathName === `dashboard/${item.WorkSpace.id}`}
+                selected={pathName === `/dashboard/${item.WorkSpace.id}`}
                 title={item.WorkSpace.name}
                 notifications={0}
                 key={item.WorkSpace.name}
-                icon={
-                  <WorkspacePlaceholder>
-                    {item.WorkSpace.name.charAt(0)}
-                  </WorkspacePlaceholder>
-                }
+                icon={<WorkspacePlaceholder>{item.WorkSpace.name.charAt(0)}</WorkspacePlaceholder>}
               />
             ))}
         </ul>
@@ -202,12 +186,13 @@ const Sidebar = ({ activeWorkspaceId }: Props) => {
         />
       )}
     </div>
-  );
+  </div>
+);
   return (
     <div className="full">
       <InfoBar />
 
-      <div className="md:hidden fixed my-4 z-11">
+      <div className="md:hidden fixed my-4 z-50">
         <Sheet>
           <SheetTrigger asChild className="ml-2">
             <Button variant={"ghost"} className="mt-[2px]">

@@ -1,5 +1,9 @@
 import { NextRequest } from "next/server";
-import { S3Client, GetObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  GetObjectCommand,
+  HeadObjectCommand,
+} from "@aws-sdk/client-s3";
 
 const s3 = new S3Client({
   endpoint: process.env.MINIO_ENDPOINT,
@@ -13,20 +17,23 @@ const s3 = new S3Client({
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ filename: string }> }
+  { params }: { params: Promise<{ filename: string }> },
 ) {
   try {
     const { filename } = await params;
-    const range = req.headers.get("range"); 
+    const range = req.headers.get("range");
 
-    const head = await s3.send(new HeadObjectCommand({
-      Bucket: process.env.MINIO_BUCKET_NAME,
-      Key: filename,
-    }));
+    const head = await s3.send(
+      new HeadObjectCommand({
+        Bucket: process.env.MINIO_BUCKET_NAME,
+        Key: filename,
+      }),
+    );
 
     const fileSize = head.ContentLength!;
-    const contentType = filename.endsWith(".mp4") ? "video/mp4" : "video/webm";
-
+    const contentType = filename.endsWith(".mp4")
+      ? "video/mp4"
+      : "video/webm; codecs=vp9,opus";
     if (range) {
       const parts = range.replace(/bytes=/, "").split("-");
       const start = parseInt(parts[0], 10);
@@ -67,7 +74,7 @@ export async function GET(
       headers: {
         "Content-Type": contentType,
         "Content-Length": fileSize.toString(),
-        "Accept-Ranges": "bytes", 
+        "Accept-Ranges": "bytes",
         "Cache-Control": "public, max-age=86400",
       },
     });
