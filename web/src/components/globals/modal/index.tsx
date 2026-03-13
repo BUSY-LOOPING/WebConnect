@@ -1,5 +1,13 @@
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import React from "react";
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 
 type Props = {
   trigger: React.ReactNode;
@@ -17,9 +25,12 @@ const Modal = ({ children, description, title, trigger, className }: Props) => {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
+          <VisuallyHidden.Root>
             <DialogTitle>{title}</DialogTitle>
             <DialogDescription>{description}</DialogDescription>
+          </VisuallyHidden.Root>
         </DialogHeader>
+
         {children}
       </DialogContent>
     </Dialog>

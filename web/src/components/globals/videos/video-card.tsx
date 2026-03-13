@@ -90,14 +90,14 @@ const VideoCard = (props: Props) => {
         <video
           controls={false}
           preload="metadata"
-          className="w-full aspect-video opacity-50 z-20"
+          className="w-full aspect-video opacity-50"
         >
           <source
             src={`${process.env.NEXT_PUBLIC_CLOUD_FRONT_STREAM_URL}/${props.source}#t=0.1`}
           />
         </video>
 
-        <div className="flex flex-col gap-y-2 z-20 px-5 py-3">
+        <div className="flex flex-col gap-y-2 px-5 py-3">
           <h2 className="text-sm font-semibold text-[#bdbdbd]">
             {props.title}
           </h2>

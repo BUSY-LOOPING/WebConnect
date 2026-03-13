@@ -77,7 +77,7 @@ const Sidebar = ({ activeWorkspaceId }: Props) => {
     </Link>
 
     <div className="mt-10 flex flex-col gap-4 items-center px-4 pb-4 overflow-y-auto flex-1">
-      <Select defaultValue={activeWorkspaceId} onValueChange={onChangeActiveWorkspace}>
+      <Select defaultValue={activeWorkspaceId || ''} onValueChange={onChangeActiveWorkspace}>
         <SelectTrigger className="w-full text-neutral-400 bg-transparent">
           <SelectValue placeholder="Select a workspace" />
         </SelectTrigger>
