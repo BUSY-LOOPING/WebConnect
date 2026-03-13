@@ -93,7 +93,8 @@ const VideoCard = (props: Props) => {
           className="w-full aspect-video opacity-50"
         >
           <source
-            src={`${process.env.NEXT_PUBLIC_CLOUD_FRONT_STREAM_URL}/${props.source}#t=0.1`}
+            src={`${process.env.NEXT_PUBLIC_CLOUD_FRONT_STREAM_URL}/${props.source}`}
+            type="video/mp4"
           />
         </video>
 

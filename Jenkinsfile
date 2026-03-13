@@ -13,7 +13,7 @@ pipeline {
                     script {
                         sh "cp \$SECURE_ENV .env"
                         sh "sed -i 's/\r//' .env"
-                        sh 'docker compose down --remove-orphans || true'
+                        sh 'docker compose pull || true'
                         sh 'docker compose build'
                         sh 'docker compose up -d'
                         sleep 5

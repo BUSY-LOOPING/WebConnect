@@ -31,9 +31,7 @@ export async function GET(
     );
 
     const fileSize = head.ContentLength!;
-    const contentType = filename.endsWith(".mp4")
-      ? "video/mp4"
-      : "video/webm; codecs=vp9,opus";
+    const contentType = "video/mp4";
     if (range) {
       const parts = range.replace(/bytes=/, "").split("-");
       const start = parseInt(parts[0], 10);
