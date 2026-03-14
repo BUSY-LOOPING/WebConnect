@@ -84,6 +84,7 @@ const VideoPreview = ({ videoId }: Props) => {
 
         <video
           preload="metadata"
+          playsInline
           className={`w-full aspect-video rounded-xl transition-opacity duration-500 ${
             isPlaying ? "opacity-100" : "opacity-50"
           }`}
